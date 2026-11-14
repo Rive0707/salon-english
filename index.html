@@ -56,6 +56,7 @@ footer{font-size:12px;color:#9ca3af;text-align:center;padding:20px 0}
 <nav>
 <button data-page="phrases" class="on">💬 フレーズ</button>
 <button data-page="drill">✍️ ドリル</button>
+<button data-page="vocab">📖 単語</button>
 <button data-page="fav">★ お気に入り</button>
 <button data-page="help">？ 使い方</button>
 </nav>
@@ -97,6 +98,13 @@ footer{font-size:12px;color:#9ca3af;text-align:center;padding:20px 0}
 </div>
 </section>
 
+<section id="vocab">
+<h2>単語集</h2>
+<p class="hint">サロンで使う単語。🔊で発音を確認できます。</p>
+<div class="chips" id="vocabChips"></div>
+<div id="vocabList"></div>
+</section>
+
 <section id="fav">
 <h2>お気に入りフレーズ</h2>
 <p class="hint">★をつけたフレーズがここにたまります。</p>
@@ -107,13 +115,14 @@ footer{font-size:12px;color:#9ca3af;text-align:center;padding:20px 0}
 <h2>使い方</h2>
 <div class="card">
 <p><b>フレーズ</b>：シーンを選んで英語と日本語を確認。🔊で発音を聞けます。★でお気に入りへ。</p>
+<p><b>単語</b>：髪型・カラー・商品・道具など、サロンで使う単語集です。</p>
 <p><b>ドリル</b>：日本語の場面を見て、英語で答える練習です。Geminiが採点して、良い点・直すところ・自然な言い方を教えてくれます。</p>
 <p><b>ホーム画面に追加</b>：Chromeのメニューから「ホーム画面に追加」で、アプリのように使えます。</p>
 <p><b>Gemini APIキー</b>：Google AI Studioで無料で取得できます。キーはこのスマホの中だけに保存され、外部に送信されません。</p>
 </div>
 </section>
 </main>
-<footer>Salon English v1.0 — 無料のPWAです</footer>
+<footer>Salon English v1.1 — 無料のPWAです</footer>
 <script>
 const $=id=>document.getElementById(id);
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -149,7 +158,7 @@ const SCENES=[
 ['Would you like to try a slightly lighter color?','少し明るめの色にしてみませんか？'],
 ['This color will fade a little after a few washes.','この色は数回洗うと少し落ちます。'],
 ["I'll do a patch test first.",'先にパッチテストをしますね。'],
-['How long would you like the perm to last?','パーマはどれくらい持たせたいですか？']]},
+['Would you like loose curls or tight curls?','ゆるいカールとしっかりしたカール、どちらにしますか？']]},
 {id:'finish',name:'仕上げ',items:[
 ['Would you like me to style it with wax?','ワックスで仕上げましょうか？'],
 ['How does this look?','いかがですか？'],
@@ -159,7 +168,7 @@ const SCENES=[
 ["That'll be 8,000 yen.",'8,000円になります。'],
 ['Cash or card?','現金とカード、どちらにしますか？'],
 ['Would you like to book your next appointment today?','次回のご予約を今日お取りしますか？'],
-['We have an opening next Saturday at 2.','来週土曜の2時に空きがあります。'],
+['We have an opening next Saturday at 2 p.m.','来週土曜の2時に空きがあります。'],
 ['Thank you for coming today.','本日はありがとうございました。']]},
 {id:'product',name:'商品のご提案',items:[
 ['This shampoo is good for dry hair.','このシャンプーは乾燥した髪におすすめです。'],
@@ -168,13 +177,34 @@ const SCENES=[
 {id:'smalltalk',name:'雑談',items:[
 ['Did you have a good weekend?','週末はいかがでしたか？'],
 ["The weather is nice today, isn't it?",'今日はいい天気ですね。'],
-['Have you been on holiday recently?','最近どこか旅行に行きましたか？'],
+['Have you been on vacation recently?','最近どこか旅行に行きましたか？'],
 ['Are you going anywhere for the holidays?','休暇はどこか行く予定ですか？']]},
 {id:'trouble',name:'お困りのとき',items:[
 ["I'm sorry about the wait.",'お待たせしてすみません。'],
 ['Let me fix that for you.','直しますね。'],
 ['Would you like me to adjust it?','調整しましょうか？'],
-["I'm sorry, we're fully booked today.",'申し訳ありません、本日は満席です。']]}
+["I'm sorry, we're fully booked today.",'申し訳ありません、本日は満席です。']]},
+{id:'phone',name:'電話予約',items:[
+['Thank you for calling. How can I help you?','お電話ありがとうございます。ご用件をお聞かせください。'],
+['Would you like to make an appointment?','ご予約されますか？'],
+['What day and time works for you?','ご希望の日時はいつですか？'],
+['May I have your name, please?','お名前を教えてください。'],
+["We'll see you on Saturday at 2 p.m.",'土曜の2時にお待ちしております。']]},
+{id:'first',name:'初回のお客様',items:[
+['Is this your first time with us?','初めてのご来店ですか？'],
+['How did you hear about us?','どちらで当店をお知りになりましたか？'],
+['Let me show you around the salon.','サロンをご案内しますね。'],
+['Would you like a consultation first?','まずカウンセリングをしましょうか？']]},
+{id:'aftercare',name:'アフターケア',items:[
+['Try not to wash your hair for 24 hours.','24時間は洗髪をお控えください。'],
+['Use sulfate-free shampoo to keep the color.','色持ちのため、サルフェートフリーのシャンプーをお使いください。'],
+['Come back in about six weeks for a touch-up.','6週間後くらいにリタッチにお越しください。'],
+['If you have any problems, please call us.','何かありましたら、お電話ください。']]},
+{id:'fix',name:'お直し・クレーム',items:[
+["I'm sorry, let me fix that right away.",'すみません、すぐ直しますね。'],
+['Would you like it a little shorter?','もう少し短くしますか？'],
+['I understand. Let me adjust the color.','分かりました。色を調整しますね。'],
+["We'd like to offer you a free touch-up.",'無料でお直しさせていただきます。']]}
 ];
 const PHRASES=[];
 SCENES.forEach(sc=>sc.items.forEach((it,i)=>PHRASES.push({id:sc.id+'-'+i,scene:sc.id,sceneName:sc.name,en:it[0],ja:it[1]})));
@@ -208,6 +238,34 @@ function renderFavs(){
   const list=PHRASES.filter(p=>isFav(p.id));
   if(!list.length){box.innerHTML='<p class="empty">まだお気に入りはありません。フレーズの★をタップして保存してください。</p>';return}
   list.forEach(p=>box.appendChild(phraseCard(p)));
+}
+
+// ===== 単語集 =====
+const VOCAB=[
+{cat:'髪型・スタイル',words:[
+['bob','ボブ'],['pixie cut','ピクシーカット（ベリーショート）'],['layers','レイヤー（段）'],['bangs','前髪（米）'],['fringe','前髪（英）'],['long layers','ロングレイヤー'],['undercut','アンダーカット'],['fade','フェード'],['side part','サイドパート（分け目）'],['center part','センターパート'],['updo','アップスタイル']]},
+{cat:'カラー・パーマ',words:[
+['highlights','ハイライト'],['lowlights','ローライト'],['balayage','バレイヤージュ'],['ombré','オンブレ（グラデーションカラー）'],['roots','根元'],['touch-up','リタッチ'],['bleach','ブリーチ'],['toner','トナー'],['perm','パーマ'],['digital perm','デジタルパーマ'],['straightening','縮毛矯正']]},
+{cat:'髪の状態・悩み',words:[
+['split ends','枝毛'],['dry hair','乾燥した髪'],['damaged hair','ダメージヘア'],['frizzy hair','くせ毛・広がる髪'],['thinning hair','薄毛'],['oily scalp','脂っぽい頭皮'],['dandruff','フケ'],['volume','ボリューム'],['texture','質感']]},
+{cat:'商品',words:[
+['shampoo','シャンプー'],['conditioner','コンディショナー'],['treatment','トリートメント'],['hair oil','ヘアオイル'],['wax','ワックス'],['hair spray','ヘアスプレー'],['gel','ジェル'],['mousse','ムース']]},
+{cat:'道具',words:[
+['scissors','はさみ'],['thinning shears','セニングシザー（すきばさみ）'],['clippers','バリカン'],['hair dryer','ドライヤー'],['straightener','ストレートアイロン'],['curling iron','カールアイロン'],['comb','コーム'],['brush','ブラシ'],['cape','ケープ（クロス）'],['mirror','鏡']]}
+];
+let curVocab=0;
+function renderVocabChips(){
+  const box=$('vocabChips');box.innerHTML='';
+  VOCAB.forEach((c,i)=>{const b=document.createElement('button');b.className='chip'+(curVocab===i?' on':'');b.textContent=c.cat;b.onclick=()=>{curVocab=i;renderVocabChips();renderVocab()};box.appendChild(b)});
+}
+function renderVocab(){
+  const box=$('vocabList');box.innerHTML='';
+  VOCAB[curVocab].words.forEach(w=>{
+    const d=document.createElement('div');d.className='card';
+    d.innerHTML='<p class="en">'+esc(w[0])+'</p><p class="ja">'+esc(w[1])+'</p><div class="row"><button class="btn" data-say>🔊 発音</button></div>';
+    d.querySelector('[data-say]').onclick=()=>say(w[0]);
+    box.appendChild(d);
+  });
 }
 
 // ===== ナビ =====
@@ -321,7 +379,7 @@ function initDrill(){
   if(geminiKey()){$('drillNoKey').style.display='none';$('drillSetup').style.display='block';showDrillStats()}
   else{$('drillNoKey').style.display='block';$('drillSetup').style.display='none'}
 }
-renderChips();renderPhrases();renderFavs();initDrill();
+renderChips();renderPhrases();renderFavs();renderVocabChips();renderVocab();initDrill();
 if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{})}
 </script>
 </body>
