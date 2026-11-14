@@ -35,6 +35,7 @@ h2{font-size:18px;margin:4px 0 12px}
 .fav{margin-left:auto;color:#d1d5db;font-size:20px;line-height:1}
 .fav.on{color:#db2777}
 .scene{font-size:12px;color:#db2777;font-weight:700;margin:0 0 2px}
+.tip{font-size:13px;color:#6b7280;background:#fdf2f8;border-radius:8px;padding:6px 8px;margin:0 0 8px}
 input,textarea,select{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:8px;font-size:16px;margin:6px 0}
 textarea{min-height:64px}
 .q{font-size:20px;font-weight:700;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:18px;margin:12px 0}
@@ -51,7 +52,7 @@ footer{font-size:12px;color:#9ca3af;text-align:center;padding:20px 0}
 <body>
 <header>
 <h1>✂️ Salon <span>English</span></h1>
-<p>美容師の接客英語 — サロンでそのまま使えるフレーズとドリル</p>
+<p>美容師の接客英語 — 現場でそのまま使える実践フレーズ</p>
 </header>
 <nav>
 <button data-page="phrases" class="on">💬 フレーズ</button>
@@ -63,7 +64,7 @@ footer{font-size:12px;color:#9ca3af;text-align:center;padding:20px 0}
 <main>
 <section id="phrases" class="on">
 <h2>シーン別フレーズ集</h2>
-<p class="hint">場面を選んで、英語フレーズを確認。🔊で発音、★でお気に入りに保存できます。</p>
+<p class="hint">場面を選んで、英語フレーズを確認。🔊で発音、★でお気に入りに保存できます。💡は使い方のポイントです。</p>
 <div class="chips" id="sceneChips"></div>
 <div id="phraseList"></div>
 </section>
@@ -78,7 +79,7 @@ footer{font-size:12px;color:#9ca3af;text-align:center;padding:20px 0}
 <input type="password" id="geminiKey" placeholder="AIza..." autocomplete="off">
 <button class="btn primary" id="saveKey">キーを保存</button>
 <p class="hint" id="keyStatus"></p>
-<p class="hint">キーがなくても、下の「キーなしではじめる」で練習問題（10問）を使えます。</p>
+<p class="hint">キーがなくても、下の「キーなしではじめる」で練習問題（12問）を使えます。</p>
 <button class="btn" id="startNoKey">キーなしではじめる</button>
 </div>
 </div>
@@ -114,100 +115,182 @@ footer{font-size:12px;color:#9ca3af;text-align:center;padding:20px 0}
 <section id="help">
 <h2>使い方</h2>
 <div class="card">
-<p><b>フレーズ</b>：シーンを選んで英語と日本語を確認。🔊で発音を聞けます。★でお気に入りへ。</p>
-<p><b>単語</b>：髪型・カラー・商品・道具など、サロンで使う単語集です。</p>
+<p><b>フレーズ</b>：シーンを選んで英語と日本語を確認。🔊で発音を聞けます。★でお気に入りへ。💡は、場面ごとの使い分けや、間違えやすいポイントです。</p>
+<p><b>単語</b>：髪型・カラー・髪質・カット技法・頭皮・予約・仕上がりの表現など、サロンで使う単語集です。</p>
 <p><b>ドリル</b>：日本語の場面を見て、英語で答える練習です。Geminiが採点して、良い点・直すところ・自然な言い方を教えてくれます。</p>
 <p><b>ホーム画面に追加</b>：Chromeのメニューから「ホーム画面に追加」で、アプリのように使えます。</p>
 <p><b>Gemini APIキー</b>：Google AI Studioで無料で取得できます。キーはこのスマホの中だけに保存され、外部に送信されません。</p>
+<p><b>フレーズについて</b>：教科書英語ではなく、現場でネイティブが実際に使う自然な表現を集めています。カラー・パーマは種類別、シャンプーは9つの場面に分けてあります。</p>
 </div>
 </section>
 </main>
-<footer>Salon English v1.1 — 無料のPWAです</footer>
+<footer>Salon English v2.0 — 無料のPWAです</footer>
 <script>
 const $=id=>document.getElementById(id);
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function toast(s){const t=document.createElement('div');t.textContent=s;t.style.cssText='position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1f2937;color:#fff;padding:10px 16px;border-radius:999px;font-size:14px;z-index:99';document.body.appendChild(t);setTimeout(()=>t.remove(),2200)}
 function say(t){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-US';speechSynthesis.speak(u)}catch(e){}}
 
-// ===== フレーズデータ（オリジナル） =====
+// ===== フレーズデータ（v2.0：現場で使う自然な表現に作り直し） =====
+// 形式：[英語, 日本語, 小分類（任意）, ポイント（任意）]
 const SCENES=[
-{id:'welcome',name:'お出迎え',items:[
-['Welcome! Do you have an appointment today?','今日はご予約されていますか？'],
-['Please come in and have a seat.','どうぞお入りになって、おかけください。'],
-['Would you like something to drink?','何かお飲み物はいかがですか？'],
-['May I take your coat?','コートをお預かりしましょうか？'],
-['Your stylist will be with you in a moment.','担当のスタイリストがまもなく参ります。']]},
+{id:'welcome',name:'お出迎え・受付',items:[
+["Hi! Welcome in!",'いらっしゃいませ！','','「Welcome to our beauty salon!」より自然な一言'],
+["Do you have an appointment today?",'今日はご予約されていますか？'],
+["Can I get your name?",'お名前を教えてください。'],
+["Right this way.",'こちらへどうぞ。'],
+["Can I take your coat?",'コートをお預かりしましょうか？'],
+["You can put your bag here.",'お荷物はこちらにどうぞ。'],
+["Just a moment, please.",'少々お待ちください。'],
+["I'm your stylist today. I'll be taking care of you.",'今日の担当です。よろしくお願いします。']]},
 {id:'counsel',name:'カウンセリング',items:[
-['How would you like your hair today?','今日はどのようなスタイルにしますか？'],
-['How much would you like me to cut off?','どれくらい切りますか？'],
-['Do you have a photo of the style you want?','ご希望のスタイルの写真はありますか？'],
-['Would you like it shorter on the sides?','サイドは短めにしますか？'],
-['Is this length OK for you?','この長さでよろしいですか？'],
-['Would you like to keep the length and just shape it?','長さはそのままで形だけ整えますか？']]},
+["What are we doing today?",'今日はどうしますか？'],
+["What kind of look are you going for today?",'今日はどんなスタイルにしますか？','','「イメージ」ではなく look を使うのが自然'],
+["Do you have any reference photos?",'ご希望のスタイルの写真はありますか？'],
+["Are you going for something like this?",'こんな感じにしますか？'],
+["How much length would you like to take off?",'どのくらい切りますか？','','長さではなく「切る量」を聞く'],
+["Do you want to keep the length, or take off a few inches?",'長さはキープしますか、それとも数センチ切りますか？'],
+["How do you usually style your hair?",'普段はどうセットしていますか？'],
+["How much time do you spend styling your hair in the morning?",'朝のセットにどれくらい時間を使いますか？'],
+["Do you usually wear your hair up?",'普段は髪を結びますか？'],
+["Is there any length you'd definitely like to keep?",'どうしても残したい長さはありますか？'],
+["Is there anything you'd like to avoid?",'避けたいことはありますか？'],
+["What are you hoping to achieve?",'どんな仕上がりをイメージしていますか？'],
+["What do you like and dislike about your current hair?",'今の髪で好きなところ、気になるところはありますか？'],
+["How much maintenance are you comfortable with?",'お手入れはどれくらいできますか？'],
+["Are you looking for something warm or cool-toned?",'暖色系と寒色系、どちらがお好みですか？'],
+["Is this your first time with us?",'初めてのご来店ですか？','初回'],
+["When was your last haircut?",'前回のカットはいつですか？','初回・履歴'],
+["Do you have any allergies or scalp sensitivities?",'アレルギーや頭皮の敏感さはありますか？','初回・安全']]},
 {id:'shampoo',name:'シャンプー',items:[
-["I'll shampoo your hair now.",'今からシャンプーしますね。'],
-['Is the water temperature OK?','お湯の温度は大丈夫ですか？'],
-['Would you like a head massage?','ヘッドマッサージはいかがですか？'],
-['Please let me know if the water is too hot.','熱かったら教えてくださいね。']]},
+["I'll take you to the shampoo area.",'シャンプー台へご案内しますね。','案内・姿勢'],
+["Lean your head back slowly. Is your neck comfortable?",'ゆっくり頭を倒してください。首は大丈夫ですか？','案内・姿勢'],
+["Is the water temperature okay?",'お湯の温度は大丈夫ですか？','お湯の温度','まず覚えるのはこの一言'],
+["Is it too hot? Would you like it a little cooler?",'熱すぎませんか？少しぬるくしますか？','お湯の温度'],
+["Is the water pressure okay?",'水圧は大丈夫ですか？','水圧','temperature（温度）と pressure（水圧）は別物'],
+["Is any water getting on your face?",'お顔にお湯がかかっていませんか？','水圧'],
+["I'm going to use a moisturizing shampoo because your hair feels a little dry.",'髪が少し乾燥しているので、保湿シャンプーを使いますね。','シャンプー剤'],
+["This is a color-safe shampoo.",'これはカラー用のシャンプーです。','シャンプー剤'],
+["Is the pressure okay? Would you like it firmer or lighter?",'力加減はどうですか？強めと弱め、どちらがいいですか？','マッサージ','pressure はここではマッサージの強さ'],
+["Is there anywhere that feels itchy?",'かゆいところはありますか？','マッサージ'],
+["Does your scalp feel itchy or dry?",'頭皮にかゆみや乾燥はありますか？','頭皮チェック'],
+["Do you have any cuts or irritation on your scalp?",'頭皮に傷や荒れはありますか？','頭皮チェック'],
+["I'm going to rinse your hair now. Please keep your eyes closed.",'すすぎますね。目を閉じていてください。','すすぎ'],
+["I'll make sure to rinse out all the shampoo.",'シャンプーをしっかり流しますね。','すすぎ'],
+["I'm going to apply a treatment now. I'll focus on the ends.",'トリートメントをつけますね。毛先を中心にします。','トリートメント'],
+["I'll leave it on for a few minutes.",'数分置いておきますね。','トリートメント'],
+["All done! I'll towel-dry your hair now.",'終わりました！タオルで拭きますね。','終了・起き上がり'],
+["Please sit up slowly. Are you feeling okay?",'ゆっくり起きてください。気分は大丈夫ですか？','終了・起き上がり']]},
 {id:'cut',name:'カット',items:[
-["I'll start cutting now.",'カットを始めますね。'],
-['Please look straight ahead.','まっすぐ前をご覧ください。'],
-["I'll trim the ends a little.",'毛先を少し整えますね。'],
-['How does this look so far?','ここまでいかがですか？']]},
-{id:'color',name:'カラー・パーマ',items:[
-['Would you like to try a slightly lighter color?','少し明るめの色にしてみませんか？'],
-['This color will fade a little after a few washes.','この色は数回洗うと少し落ちます。'],
-["I'll do a patch test first.",'先にパッチテストをしますね。'],
-['Would you like loose curls or tight curls?','ゆるいカールとしっかりしたカール、どちらにしますか？']]},
+["I'll just trim the ends first.",'まず毛先を整えますね。'],
+["I'll take about two centimeters off.",'2センチくらい切りますね。'],
+["Would you like it a little shorter?",'もう少し短くしますか？'],
+["What would you like to do with your bangs?",'前髪はどうしますか？'],
+["Would you like your bangs above your eyes?",'前髪は目の上くらいにしますか？'],
+["Would you like some layers around your face?",'顔まわりにレイヤーを入れますか？'],
+["I'll take some weight out.",'量を減らしますね。','','「軽くする」は take weight out（量を減らす）'],
+["I'll thin it out a little.",'少しすきますね。','','thin out＝すく・量を減らす'],
+["I'll add some movement to the ends.",'毛先に動きを出しますね。'],
+["Let me check both sides.",'両側を確認しますね。'],
+["Is this length okay at the back?",'後ろの長さはこれでいいですか？'],
+["How short would you like it?",'どれくらい短くしますか？','','「Do you want short?」は不自然']]},
+{id:'color',name:'カラー',items:[
+["What color are you thinking of?",'どんな色にしますか？','カウンセリング'],
+["Are you looking for this kind of color?",'こんな色にしますか？','カウンセリング'],
+["Do you prefer warm or cool tones?",'暖色系と寒色系、どちらがいいですか？','カウンセリング'],
+["Would you like an all-over color today?",'今日は全体染めにしますか？','フルカラー'],
+["We'll color your hair from roots to ends.",'根元から毛先まで染めますね。','フルカラー'],
+["Would you like just your roots touched up?",'根元のリタッチだけにしますか？','リタッチ'],
+["I'll match it to your previous color.",'今の色に合わせて染めますね。','リタッチ'],
+["Would you like to add some highlights?",'ハイライトを入れますか？','ハイライト'],
+["Would you like subtle or bold highlights?",'控えめなハイライトと目立つハイライト、どちらがいいですか？','ハイライト'],
+["We can add some lowlights to give your hair more depth.",'深みを出すためにローライトを入れましょう。','ローライト'],
+["Are you interested in balayage?",'バレイヤージュに興味はありますか？','バレイヤージュ'],
+["Balayage gives a natural, sun-kissed blend, so the grow-out looks seamless.",'バレイヤージュは自然なグラデーションで、根元が伸びても境目が目立ちません。','バレイヤージュ'],
+["Have you ever had your hair bleached?",'ブリーチしたことはありますか？','ブリーチ'],
+["We'll need to bleach your hair to achieve that color.",'その色にするにはブリーチが必要です。','ブリーチ'],
+["We may not be able to achieve that exact shade in one session.",'その色は1回では出せないかもしれません。','ブリーチ','できないことを先に伝えるのが大事'],
+["Have you ever colored your hair at home?",'市販のカラー剤で染めたことはありますか？','ブリーチ','市販の黒染めはブリーチの仕上がりに影響する'],
+["We'll use a toner to adjust the tone.",'トナーで色味を調整しますね。','トナー'],
+["It'll help neutralize the yellow tones.",'黄ばみを抑えます。','トナー'],
+["Would you like full gray coverage, or do you want to blend the grays naturally?",'白髪をしっかり染めますか、それとも自然にぼかしますか？','白髪染め','白髪は gray hair（white hair ではない）'],
+["Are you looking for a vivid color?",'鮮やかな色にしますか？','ファッションカラー'],
+["The color will gradually fade.",'色は少しずつ落ちていきます。','色持ち・色落ち'],
+["I'll do a patch test first.",'先にパッチテストをしますね。','安全']]},
+{id:'perm',name:'パーマ',items:[
+["Have you ever had a perm?",'パーマをかけたことはありますか？','カウンセリング'],
+["How curly would you like it?",'どれくらいのカールにしますか？','カウンセリング'],
+["Would you prefer loose, natural-looking curls or more defined curls?",'ゆるい自然なカールと、しっかりしたカール、どちらがいいですか？','カウンセリング'],
+["Would you like a straightening treatment?",'ストレートパーマにしますか？','ストレートパーマ'],
+["This will help reduce volume and control frizz.",'ボリュームを抑えて広がりを落ち着かせます。','ストレートパーマ'],
+["This treatment may not completely straighten your natural curls.",'クセを完全に伸ばすものではありません。','ストレートパーマ'],
+["Are you interested in a digital perm?",'デジタルパーマに興味はありますか？','デジタルパーマ'],
+["A digital perm uses heat, so the curls are looser and last longer.",'デジタルパーマは熱を使うので、ゆるいカールが長持ちします。','デジタルパーマ'],
+["The curls tend to become more defined as your hair dries.",'乾くほどカールが出やすくなります。','デジタルパーマ'],
+["We'll give you a traditional cold perm.",'通常のコールドパーマにしますね。','コールドパーマ'],
+["A cold perm uses perm solution and rods, without heat.",'コールドパーマは薬剤とロッドで、熱を使わずにカールを作ります。','コールドパーマ'],
+["Are you interested in Japanese hair straightening?",'縮毛矯正に興味はありますか？','縮毛矯正','海外では Japanese hair straightening が通じる'],
+["Japanese hair straightening uses a flat iron to straighten curly hair.",'縮毛矯正はアイロンでクセをしっかり伸ばします。','縮毛矯正']]},
+{id:'during',name:'施術中の声かけ',items:[
+["Just let me know if you need anything.",'何かあればいつでも言ってくださいね。'],
+["Does that hurt at all?",'痛みはありますか？'],
+["Is it burning or irritating your scalp?",'頭皮がヒリヒリしませんか？'],
+["It'll take about 10 more minutes.",'あと10分くらいかかります。'],
+["We're almost done.",'もう少しで終わります。'],
+["Are you feeling cold?",'寒くありませんか？'],
+["Would you like a magazine or something to drink?",'雑誌やお飲み物はいかがですか？'],
+["Would you like to use the restroom?",'お手洗いは大丈夫ですか？']]},
 {id:'finish',name:'仕上げ',items:[
-['Would you like me to style it with wax?','ワックスで仕上げましょうか？'],
-['How does this look?','いかがですか？'],
-["I'll show you the back with a mirror.",'後ろを鏡でお見せしますね。'],
-['Would you like more volume on top?','トップにボリュームを出しますか？']]},
+["How do you like it?",'いかがですか？','','仕上げの確認で一番大事な一言'],
+["Is this what you had in mind?",'イメージ通りですか？'],
+["Would you like me to take a little more off?",'もう少し切りますか？'],
+["Let me show you how to style it at home.",'お家でのセット方法をお見せしますね。'],
+["Take a look from this side, too.",'こちらの側も見てみてください。'],
+["Is there anything you'd like me to adjust?",'調整したいところはありますか？'],
+["How would you like me to style it today? Straight or wavy?",'仕上げはどうしますか？ストレートと巻き髪、どちらがいいですか？']]},
 {id:'payment',name:'お会計・次回予約',items:[
-["That'll be 8,000 yen.",'8,000円になります。'],
-['Cash or card?','現金とカード、どちらにしますか？'],
-['Would you like to book your next appointment today?','次回のご予約を今日お取りしますか？'],
-['We have an opening next Saturday at 2 p.m.','来週土曜の2時に空きがあります。'],
-['Thank you for coming today.','本日はありがとうございました。']]},
-{id:'product',name:'商品のご提案',items:[
-['This shampoo is good for dry hair.','このシャンプーは乾燥した髪におすすめです。'],
-['Would you like to take one home today?','今日お持ち帰りになりますか？'],
-['Use a small amount after shampooing.','シャンプーの後に少量お使いください。']]},
+["Your total comes to 8,000 yen.",'お会計は8,000円です。'],
+["How would you like to pay?",'お支払い方法はいかがしますか？'],
+["We accept credit cards.",'クレジットカードが使えます。'],
+["Would you like a receipt?",'レシートは必要ですか？'],
+["Would you like to book your next appointment?",'次回のご予約を取りますか？'],
+["I'd recommend coming back in six to eight weeks.",'6〜8週間後のご来店がおすすめです。']]},
+{id:'product',name:'商品・アフターケア',items:[
+["I'd recommend this product.",'この商品がおすすめです。'],
+["This is great for dry hair.",'乾燥した髪におすすめです。'],
+["You only need a small amount.",'少量で十分です。'],
+["Apply it mainly to the ends.",'毛先を中心につけてください。'],
+["I'd recommend using a color-safe shampoo.",'カラー用シャンプーがおすすめです。'],
+["Try not to wash your hair today.",'今日は洗髪をお控えください。','','施術によっては当てはまらないので注意']]},
 {id:'smalltalk',name:'雑談',items:[
-['Did you have a good weekend?','週末はいかがでしたか？'],
-["The weather is nice today, isn't it?",'今日はいい天気ですね。'],
-['Have you been on vacation recently?','最近どこか旅行に行きましたか？'],
-['Are you going anywhere for the holidays?','休暇はどこか行く予定ですか？']]},
-{id:'trouble',name:'お困りのとき',items:[
-["I'm sorry about the wait.",'お待たせしてすみません。'],
-['Let me fix that for you.','直しますね。'],
-['Would you like me to adjust it?','調整しましょうか？'],
-["I'm sorry, we're fully booked today.",'申し訳ありません、本日は満席です。']]},
+["Are you visiting Japan?",'日本に旅行で来られたんですか？'],
+["How long are you staying in Japan?",'日本にはどれくらい滞在しますか？'],
+["Have you done any sightseeing in Japan?",'日本で観光はされましたか？'],
+["Do you live in Japan?",'日本にお住まいですか？'],
+["Is this your first time in this area?",'このあたりは初めてですか？'],
+["Feel free to relax. You don't have to talk if you'd rather just enjoy some quiet time.",'ゆっくりくつろいでくださいね。静かに過ごしたいときは無理に話さなくて大丈夫です。']]},
 {id:'phone',name:'電話予約',items:[
-['Thank you for calling. How can I help you?','お電話ありがとうございます。ご用件をお聞かせください。'],
-['Would you like to make an appointment?','ご予約されますか？'],
-['What day and time works for you?','ご希望の日時はいつですか？'],
-['May I have your name, please?','お名前を教えてください。'],
+["Thank you for calling. How can I help you?",'お電話ありがとうございます。ご用件をお聞かせください。'],
+["Would you like to make an appointment?",'ご予約されますか？'],
+["What day and time works for you?",'ご希望の日時はいつですか？'],
+["May I have your name, please?",'お名前を教えてください。'],
 ["We'll see you on Saturday at 2 p.m.",'土曜の2時にお待ちしております。']]},
-{id:'first',name:'初回のお客様',items:[
-['Is this your first time with us?','初めてのご来店ですか？'],
-['How did you hear about us?','どちらで当店をお知りになりましたか？'],
-['Let me show you around the salon.','サロンをご案内しますね。'],
-['Would you like a consultation first?','まずカウンセリングをしましょうか？']]},
-{id:'aftercare',name:'アフターケア',items:[
-['Try not to wash your hair for 24 hours.','24時間は洗髪をお控えください。'],
-['Use sulfate-free shampoo to keep the color.','色持ちのため、サルフェートフリーのシャンプーをお使いください。'],
-['Come back in about six weeks for a touch-up.','6週間後くらいにリタッチにお越しください。'],
-['If you have any problems, please call us.','何かありましたら、お電話ください。']]},
-{id:'fix',name:'お直し・クレーム',items:[
-["I'm sorry, let me fix that right away.",'すみません、すぐ直しますね。'],
-['Would you like it a little shorter?','もう少し短くしますか？'],
-['I understand. Let me adjust the color.','分かりました。色を調整しますね。'],
-["We'd like to offer you a free touch-up.",'無料でお直しさせていただきます。']]}
+{id:'trouble',name:'トラブル・お直し',items:[
+["I'm sorry about that.",'申し訳ありません。'],
+["I'm sorry you're not happy with the result. Let's see what we can do.",'仕上がりにご満足いただけず申し訳ありません。どうできるか見てみましょう。','','まず気持ちを受け止める'],
+["Is something bothering you?",'気になることはありますか？'],
+["Which part are you unhappy with?",'どの部分が気になりますか？'],
+["Is it different from what you expected?",'イメージと違いましたか？'],
+["Let me double-check.",'確認させてください。'],
+["I'll do my best to fix it.",'できる限り直しますね。'],
+["Could you give me a moment?",'少々お待ちください。'],
+["Let me check with my manager.",'責任者に確認しますね。'],
+["What would you like me to change?",'どこを変えたいですか？'],
+["Is it shorter than you wanted?",'思ったより短いですか？'],
+["Is the color darker than you expected?",'思ったより色が濃いですか？']]}
 ];
 const PHRASES=[];
-SCENES.forEach(sc=>sc.items.forEach((it,i)=>PHRASES.push({id:sc.id+'-'+i,scene:sc.id,sceneName:sc.name,en:it[0],ja:it[1]})));
+SCENES.forEach(sc=>sc.items.forEach((it,i)=>PHRASES.push({id:sc.id+'-'+i,scene:sc.id,sceneName:sc.name,en:it[0],ja:it[1],sub:it[2]||'',tip:it[3]||''})));
 
 // ===== お気に入り =====
 let favs=[];try{favs=JSON.parse(localStorage.getItem('salon_favs')||'[]')}catch(e){favs=[]}
@@ -219,12 +302,15 @@ function toggleFav(id){if(isFav(id)){favs=favs.filter(f=>f!==id)}else{favs.push(
 let curScene='all';
 function renderChips(){
   const box=$('sceneChips');box.innerHTML='';
-  const all=document.createElement('button');all.className='chip'+(curScene==='all'?' on':'');all.textContent='すべて';all.onclick=()=>{curScene='all';renderChips();renderPhrases()};box.appendChild(all);
-  SCENES.forEach(sc=>{const b=document.createElement('button');b.className='chip'+(curScene===sc.id?' on':'');b.textContent=sc.name;b.onclick=()=>{curScene=sc.id;renderChips();renderPhrases()};box.appendChild(b)});
+  const all=document.createElement('button');all.className='chip'+(curScene==='all'?' on':'');all.textContent='すべて ('+PHRASES.length+')';all.onclick=()=>{curScene='all';renderChips();renderPhrases()};box.appendChild(all);
+  SCENES.forEach(sc=>{const b=document.createElement('button');b.className='chip'+(curScene===sc.id?' on':'');b.textContent=sc.name+' ('+sc.items.length+')';b.onclick=()=>{curScene=sc.id;renderChips();renderPhrases()};box.appendChild(b)});
 }
 function phraseCard(p){
   const d=document.createElement('div');d.className='card';
-  d.innerHTML='<p class="scene">'+esc(p.sceneName)+'</p><p class="en">'+esc(p.en)+'</p><p class="ja">'+esc(p.ja)+'</p><div class="row"><button class="btn" data-say>🔊 発音</button><button class="btn fav'+(isFav(p.id)?' on':'')+'" data-fav>★</button></div>';
+  let h='<p class="scene">'+esc(p.sceneName)+(p.sub?' · '+esc(p.sub):'')+'</p><p class="en">'+esc(p.en)+'</p><p class="ja">'+esc(p.ja)+'</p>';
+  if(p.tip)h+='<p class="tip">💡 '+esc(p.tip)+'</p>';
+  h+='<div class="row"><button class="btn" data-say>🔊 発音</button><button class="btn fav'+(isFav(p.id)?' on':'')+'" data-fav>★</button></div>';
+  d.innerHTML=h;
   d.querySelector('[data-say]').onclick=()=>say(p.en);
   d.querySelector('[data-fav]').onclick=()=>toggleFav(p.id);
   return d;
@@ -251,12 +337,26 @@ const VOCAB=[
 {cat:'商品',words:[
 ['shampoo','シャンプー'],['conditioner','コンディショナー'],['treatment','トリートメント'],['hair oil','ヘアオイル'],['wax','ワックス'],['hair spray','ヘアスプレー'],['gel','ジェル'],['mousse','ムース']]},
 {cat:'道具',words:[
-['scissors','はさみ'],['thinning shears','セニングシザー（すきばさみ）'],['clippers','バリカン'],['hair dryer','ドライヤー'],['straightener','ストレートアイロン'],['curling iron','カールアイロン'],['comb','コーム'],['brush','ブラシ'],['cape','ケープ（クロス）'],['mirror','鏡']]}
+['scissors','はさみ'],['thinning shears','セニングシザー（すきばさみ）'],['clippers','バリカン'],['hair dryer','ドライヤー'],['straightener','ストレートアイロン'],['curling iron','カールアイロン'],['comb','コーム'],['brush','ブラシ'],['cape','ケープ（クロス）'],['mirror','鏡']]},
+{cat:'髪質・ボリューム',words:[
+['fine hair','細い髪（毛一本の太さ）'],['thick hair','毛量が多い髪'],['coarse hair','硬い・ごわついた髪'],['thin hair','毛量が少ない髪'],['straight hair','直毛'],['wavy hair','ウェーブヘア'],['curly hair','カーリーヘア'],['frizzy hair','うねる・広がる髪'],['dry hair','乾燥した髪'],['oily scalp','脂っぽい頭皮'],['sensitive scalp','敏感な頭皮'],['damaged hair','ダメージヘア'],['split ends','枝毛'],['breakage','切れ毛']]},
+{cat:'カット技法',words:[
+['layers','レイヤー'],['face-framing layers','顔まわりレイヤー'],['blunt cut','パツッとしたカット'],['one-length cut','ワンレングス'],['graduation','グラデーションカット'],['textured cut','質感を出すカット'],['undercut','アンダーカット'],['taper','テーパー（すっきりした刈り上げ）'],['trim','毛先を整える']]},
+{cat:'カラー・薬剤',words:[
+['double process','ダブルプロセス（ブリーチ＋カラー）'],['color correction','カラーコレクション（色の修正）'],['developer','オキシ（2剤）'],['regrowth','伸びた根元'],['patch test','パッチテスト'],['color fading','色落ち'],['brassy','黄ばみがかった'],['ash tone','アッシュ系'],['warm-toned','暖色系の'],['cool-toned','寒色系の']]},
+{cat:'パーマ・ストレート技法',words:[
+['cold perm','コールドパーマ'],['Japanese hair straightening','縮毛矯正'],['keratin treatment','ケラチントリートメント'],['smoothing treatment','髪質改善トリートメント'],['curl pattern','カールの形'],['root perm','根元パーマ'],['perm solution','パーマ液'],['heat treatment','熱処理']]},
+{cat:'頭皮・健康・安全',words:[
+['allergy','アレルギー'],['irritation','刺激・かぶれ'],['redness','赤み'],['itching','かゆみ'],['burning sensation','ヒリヒリ感'],['swelling','腫れ'],['scalp condition','頭皮の状態'],['medical history','既往歴'],['allergic reaction','アレルギー反応'],['sensitive skin','敏感肌']]},
+{cat:'予約・料金・時間',words:[
+['availability','空き状況'],['fully booked','満席'],['walk-in','飛び込み（予約なし）'],['cancellation','キャンセル'],['reschedule','日程変更'],['deposit','デポジット（前金）'],['extra charge','追加料金'],['consultation fee','カウンセリング料金'],['estimated time','所要時間'],['price list','料金表']]},
+{cat:'仕上がりの表現',words:[
+['soft','柔らかい'],['smooth','なめらか'],['silky','サラサラ'],['shiny','ツヤのある'],['glossy','光沢のある'],['voluminous','ボリュームのある'],['flat','ペタッとした'],['bouncy','弾むような'],['natural-looking','自然な仕上がり'],['subtle','控えめな'],['vibrant','鮮やかな'],['ashy','アッシュ系の'],['brassy','黄ばみがかった'],['warm-toned','暖色系の'],['cool-toned','寒色系の']]}
 ];
 let curVocab=0;
 function renderVocabChips(){
   const box=$('vocabChips');box.innerHTML='';
-  VOCAB.forEach((c,i)=>{const b=document.createElement('button');b.className='chip'+(curVocab===i?' on':'');b.textContent=c.cat;b.onclick=()=>{curVocab=i;renderVocabChips();renderVocab()};box.appendChild(b)});
+  VOCAB.forEach((c,i)=>{const b=document.createElement('button');b.className='chip'+(curVocab===i?' on':'');b.textContent=c.cat+' ('+c.words.length+')';b.onclick=()=>{curVocab=i;renderVocabChips();renderVocab()};box.appendChild(b)});
 }
 function renderVocab(){
   const box=$('vocabList');box.innerHTML='';
@@ -286,16 +386,18 @@ async function geminiText(prompt){
   return (j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts||[]).map(p=>p.text||'').join('');
 }
 const DRILL_FALLBACK=[
-{jp:'今日はどのようなスタイルにしますか？',en:'How would you like your hair today?',pat:'希望を聞く'},
-{jp:'お湯の温度は大丈夫ですか？',en:'Is the water temperature OK?',pat:'確認する'},
-{jp:'サイドは短めにしますか？',en:'Would you like it shorter on the sides?',pat:'提案する'},
-{jp:'後ろを鏡でお見せしますね。',en:"I'll show you the back with a mirror.",pat:'案内する'},
-{jp:'次回のご予約を今日お取りしますか？',en:'Would you like to book your next appointment today?',pat:'予約を勧める'},
-{jp:'現金とカード、どちらにしますか？',en:'Cash or card?',pat:'選択を聞く'},
-{jp:'この色は数回洗うと少し落ちます。',en:'This color will fade a little after a few washes.',pat:'説明する'},
-{jp:'本日はありがとうございました。',en:'Thank you for coming today.',pat:'お礼を言う'},
-{jp:'週末はいかがでしたか？',en:'Did you have a good weekend?',pat:'雑談する'},
-{jp:'お待たせしてすみません。',en:"I'm sorry about the wait.",pat:'謝る'}];
+{jp:'今日はどうしますか？',en:'What are we doing today?',pat:'希望を聞く'},
+{jp:'今日はどんなスタイルにしますか？',en:'What kind of look are you going for today?',pat:'希望を聞く'},
+{jp:'お湯の温度は大丈夫ですか？',en:'Is the water temperature okay?',pat:'確認する'},
+{jp:'水圧は大丈夫ですか？',en:'Is the water pressure okay?',pat:'確認する'},
+{jp:'どのくらい切りますか？',en:'How much length would you like to take off?',pat:'長さを聞く'},
+{jp:'量を減らしますね。',en:"I'll take some weight out.",pat:'説明する'},
+{jp:'根元のリタッチだけにしますか？',en:'Would you like just your roots touched up?',pat:'提案する'},
+{jp:'その色にするにはブリーチが必要です。',en:"We'll need to bleach your hair to achieve that color.",pat:'説明する'},
+{jp:'いかがですか？',en:'How do you like it?',pat:'仕上がりを確認する'},
+{jp:'次回のご予約を取りますか？',en:'Would you like to book your next appointment?',pat:'予約を勧める'},
+{jp:'お会計は8,000円です。',en:'Your total comes to 8,000 yen.',pat:'お会計'},
+{jp:'仕上がりにご満足いただけず申し訳ありません。',en:"I'm sorry you're not happy with the result.",pat:'謝る'}];
 let drillQ=null,drillN=0,drillRecent=[];
 let drillStats={asked:0,correct:0,sum:0};
 try{Object.assign(drillStats,JSON.parse(localStorage.getItem('salon_drill_stats')||'{}'))}catch(e){}
@@ -315,7 +417,7 @@ async function nextQuestion(){
   if(geminiKey()){
     try{
       const pats=drillRecent.slice(-5).map(r=>r.pat).filter(Boolean).join('、');
-      const t=await geminiText('あなたは美容師専属の英会話コーチです。サロンでの接客で使う日本語を1文だけ出題してください。日常のサロン場面（お出迎え、カウンセリング、シャンプー、カット、カラー、仕上げ、お会計、次回予約、商品提案、雑談、トラブル対応）から選び、模範解答は15語以内にしてください。最近使った文型（'+pats+'）と重ならないようにしてください。必ず次の形式で出力してください。\nQ: （日本語1文）\nA: （英語の模範解答）\nPATTERN: （文型の名前を短く）');
+      const t=await geminiText('あなたは美容師専属の英会話コーチです。サロンでの接客で使う日本語を1文だけ出題してください。場面は、お出迎え、カウンセリング、シャンプー（お湯の温度・水圧・マッサージ・頭皮チェック・すすぎ）、カット、カラー（フルカラー・リタッチ・ハイライト・バレイヤージュ・ブリーチ・トナー・白髪染め）、パーマ（ストレート・デジタル・コールド・縮毛矯正）、仕上げ、お会計、次回予約、商品提案、雑談、トラブル対応から選んでください。教科書英語ではなく、現場でネイティブが使う自然な英語になる日本語を選んでください。模範解答は15語以内にしてください。最近使った文型（'+pats+'）と重ならないようにしてください。必ず次の形式で出力してください。\nQ: （日本語1文）\nA: （英語の模範解答）\nPATTERN: （文型の名前を短く）');
       q=parseDrillQ(t);
       if(q&&q.en.split(/\s+/).length>18)q=null;
     }catch(e){q=null}
