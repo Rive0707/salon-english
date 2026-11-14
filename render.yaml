@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: salon-english
+    env: static
+    buildCommand: ""
+    staticPublishPath: .

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Salon English | 美容師の接客英語</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#1f2937">
+<link rel="icon" href="./icon-192.png">
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;background:#faf7f5;color:#1f2937;line-height:1.6}
+header{background:#1f2937;color:#fff;padding:14px 16px;position:sticky;top:0;z-index:10}
+header h1{margin:0;font-size:20px}
+header h1 span{color:#f9a8d4}
+header p{margin:2px 0 0;font-size:12px;color:#d1d5db}
+nav{display:flex;background:#fff;border-bottom:1px solid #e5e7eb;position:sticky;top:64px;z-index:10}
+nav button{flex:1;padding:12px 4px;border:0;background:#fff;font-size:14px;cursor:pointer;color:#6b7280;border-bottom:3px solid transparent}
+nav button.on{color:#db2777;border-bottom-color:#db2777;font-weight:700}
+main{max-width:720px;margin:0 auto;padding:16px 14px 80px}
+section{display:none}
+section.on{display:block}
+h2{font-size:18px;margin:4px 0 12px}
+.hint{font-size:13px;color:#6b7280;margin:6px 0 12px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.chip{padding:7px 12px;border-radius:999px;border:1px solid #d1d5db;background:#fff;font-size:13px;cursor:pointer}
+.chip.on{background:#db2777;color:#fff;border-color:#db2777}
+.card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px;margin-bottom:10px}
+.card .en{font-size:17px;font-weight:700;margin:0 0 4px}
+.card .ja{font-size:14px;color:#4b5563;margin:0 0 8px}
+.card .row{display:flex;gap:8px}
+.btn{padding:8px 14px;border-radius:8px;border:1px solid #d1d5db;background:#fff;font-size:14px;cursor:pointer}
+.btn.primary{background:#db2777;color:#fff;border-color:#db2777}
+.btn:disabled{opacity:.5;cursor:default}
+.fav{margin-left:auto;color:#d1d5db;font-size:20px;line-height:1}
+.fav.on{color:#db2777}
+.scene{font-size:12px;color:#db2777;font-weight:700;margin:0 0 2px}
+input,textarea,select{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:8px;font-size:16px;margin:6px 0}
+textarea{min-height:64px}
+.q{font-size:20px;font-weight:700;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:18px;margin:12px 0}
+.fb{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px;margin:12px 0}
+.fb h3{margin:0 0 6px;font-size:15px}
+.fb .score{font-size:26px;font-weight:800;color:#db2777}
+.fb p{margin:6px 0;font-size:14px}
+.fb .lab{font-weight:700;color:#374151}
+.stats{font-size:13px;color:#6b7280;margin:8px 0}
+.empty{color:#6b7280;font-size:14px;text-align:center;padding:24px 0}
+footer{font-size:12px;color:#9ca3af;text-align:center;padding:20px 0}
+</style>
+</head>
+<body>
+<header>
+<h1>✂️ Salon <span>English</span></h1>
+<p>美容師の接客英語 — サロンでそのまま使えるフレーズとドリル</p>
+</header>
+<nav>
+<button data-page="phrases" class="on">💬 フレーズ</button>
+<button data-page="drill">✍️ ドリル</button>
+<button data-page="fav">★ お気に入り</button>
+<button data-page="help">？ 使い方</button>
+</nav>
+<main>
+<section id="phrases" class="on">
+<h2>シーン別フレーズ集</h2>
+<p class="hint">場面を選んで、英語フレーズを確認。🔊で発音、★でお気に入りに保存できます。</p>
+<div class="chips" id="sceneChips"></div>
+<div id="phraseList"></div>
+</section>
+
+<section id="drill">
+<h2>接客ドリル（瞬間英作文）</h2>
+<p class="hint">サロンの場面で日本語が出ます。英語で言ってみて、採点とフィードバックを受け取ります。</p>
+<div id="drillNoKey">
+<div class="card">
+<p class="hint">ドリルにはGeminiのAPIキーが必要です。SpeakFlowと同じキーを使えます。</p>
+<label>Gemini APIキー</label>
+<input type="password" id="geminiKey" placeholder="AIza..." autocomplete="off">
+<button class="btn primary" id="saveKey">キーを保存</button>
+<p class="hint" id="keyStatus"></p>
+<p class="hint">キーがなくても、下の「キーなしではじめる」で練習問題（10問）を使えます。</p>
+<button class="btn" id="startNoKey">キーなしではじめる</button>
+</div>
+</div>
+<div id="drillSetup" style="display:none">
+<p class="stats" id="drillStats"></p>
+<button class="btn primary" id="drillStart">ドリルをはじめる</button>
+</div>
+<div id="drillMain" style="display:none">
+<p class="stats" id="drillTurn"></p>
+<div class="q" id="drillQ">--</div>
+<textarea id="drillInput" placeholder="英語で答えてください"></textarea>
+<button class="btn primary" id="drillSend">答える</button>
+<div class="fb" id="drillFeedback" style="display:none"></div>
+<button class="btn" id="drillNext" style="display:none">次の問題へ →</button>
+<button class="btn" id="drillQuit">やめる</button>
+<p class="hint" id="drillStatus"></p>
+</div>
+</section>
+
+<section id="fav">
+<h2>お気に入りフレーズ</h2>
+<p class="hint">★をつけたフレーズがここにたまります。</p>
+<div id="favList"></div>
+</section>
+
+<section id="help">
+<h2>使い方</h2>
+<div class="card">
+<p><b>フレーズ</b>：シーンを選んで英語と日本語を確認。🔊で発音を聞けます。★でお気に入りへ。</p>
+<p><b>ドリル</b>：日本語の場面を見て、英語で答える練習です。Geminiが採点して、良い点・直すところ・自然な言い方を教えてくれます。</p>
+<p><b>ホーム画面に追加</b>：Chromeのメニューから「ホーム画面に追加」で、アプリのように使えます。</p>
+<p><b>Gemini APIキー</b>：Google AI Studioで無料で取得できます。キーはこのスマホの中だけに保存され、外部に送信されません。</p>
+</div>
+</section>
+</main>
+<footer>Salon English v1.0 — 無料のPWAです</footer>
+<script>
+const $=id=>document.getElementById(id);
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function toast(s){const t=document.createElement('div');t.textContent=s;t.style.cssText='position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1f2937;color:#fff;padding:10px 16px;border-radius:999px;font-size:14px;z-index:99';document.body.appendChild(t);setTimeout(()=>t.remove(),2200)}
+function say(t){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-US';speechSynthesis.speak(u)}catch(e){}}
+
+// ===== フレーズデータ（オリジナル） =====
+const SCENES=[
+{id:'welcome',name:'お出迎え',items:[
+['Welcome! Do you have an appointment today?','今日はご予約されていますか？'],
+['Please come in and have a seat.','どうぞお入りになって、おかけください。'],
+['Would you like something to drink?','何かお飲み物はいかがですか？'],
+['May I take your coat?','コートをお預かりしましょうか？'],
+['Your stylist will be with you in a moment.','担当のスタイリストがまもなく参ります。']]},
+{id:'counsel',name:'カウンセリング',items:[
+['How would you like your hair today?','今日はどのようなスタイルにしますか？'],
+['How much would you like me to cut off?','どれくらい切りますか？'],
+['Do you have a photo of the style you want?','ご希望のスタイルの写真はありますか？'],
+['Would you like it shorter on the sides?','サイドは短めにしますか？'],
+['Is this length OK for you?','この長さでよろしいですか？'],
+['Would you like to keep the length and just shape it?','長さはそのままで形だけ整えますか？']]},
+{id:'shampoo',name:'シャンプー',items:[
+["I'll shampoo your hair now.",'今からシャンプーしますね。'],
+['Is the water temperature OK?','お湯の温度は大丈夫ですか？'],
+['Would you like a head massage?','ヘッドマッサージはいかがですか？'],
+['Please let me know if the water is too hot.','熱かったら教えてくださいね。']]},
+{id:'cut',name:'カット',items:[
+["I'll start cutting now.",'カットを始めますね。'],
+['Please look straight ahead.','まっすぐ前をご覧ください。'],
+["I'll trim the ends a little.",'毛先を少し整えますね。'],
+['How does this look so far?','ここまでいかがですか？']]},
+{id:'color',name:'カラー・パーマ',items:[
+['Would you like to try a slightly lighter color?','少し明るめの色にしてみませんか？'],
+['This color will fade a little after a few washes.','この色は数回洗うと少し落ちます。'],
+["I'll do a patch test first.",'先にパッチテストをしますね。'],
+['How long would you like the perm to last?','パーマはどれくらい持たせたいですか？']]},
+{id:'finish',name:'仕上げ',items:[
+['Would you like me to style it with wax?','ワックスで仕上げましょうか？'],
+['How does this look?','いかがですか？'],
+["I'll show you the back with a mirror.",'後ろを鏡でお見せしますね。'],
+['Would you like more volume on top?','トップにボリュームを出しますか？']]},
+{id:'payment',name:'お会計・次回予約',items:[
+["That'll be 8,000 yen.",'8,000円になります。'],
+['Cash or card?','現金とカード、どちらにしますか？'],
+['Would you like to book your next appointment today?','次回のご予約を今日お取りしますか？'],
+['We have an opening next Saturday at 2.','来週土曜の2時に空きがあります。'],
+['Thank you for coming today.','本日はありがとうございました。']]},
+{id:'product',name:'商品のご提案',items:[
+['This shampoo is good for dry hair.','このシャンプーは乾燥した髪におすすめです。'],
+['Would you like to take one home today?','今日お持ち帰りになりますか？'],
+['Use a small amount after shampooing.','シャンプーの後に少量お使いください。']]},
+{id:'smalltalk',name:'雑談',items:[
+['Did you have a good weekend?','週末はいかがでしたか？'],
+["The weather is nice today, isn't it?",'今日はいい天気ですね。'],
+['Have you been on holiday recently?','最近どこか旅行に行きましたか？'],
+['Are you going anywhere for the holidays?','休暇はどこか行く予定ですか？']]},
+{id:'trouble',name:'お困りのとき',items:[
+["I'm sorry about the wait.",'お待たせしてすみません。'],
+['Let me fix that for you.','直しますね。'],
+['Would you like me to adjust it?','調整しましょうか？'],
+["I'm sorry, we're fully booked today.",'申し訳ありません、本日は満席です。']]}
+];
+const PHRASES=[];
+SCENES.forEach(sc=>sc.items.forEach((it,i)=>PHRASES.push({id:sc.id+'-'+i,scene:sc.id,sceneName:sc.name,en:it[0],ja:it[1]})));
+
+// ===== お気に入り =====
+let favs=[];try{favs=JSON.parse(localStorage.getItem('salon_favs')||'[]')}catch(e){favs=[]}
+function saveFavs(){localStorage.setItem('salon_favs',JSON.stringify(favs))}
+function isFav(id){return favs.includes(id)}
+function toggleFav(id){if(isFav(id)){favs=favs.filter(f=>f!==id)}else{favs.push(id)}saveFavs();renderPhrases();renderFavs()}
+
+// ===== フレーズ表示 =====
+let curScene='all';
+function renderChips(){
+  const box=$('sceneChips');box.innerHTML='';
+  const all=document.createElement('button');all.className='chip'+(curScene==='all'?' on':'');all.textContent='すべて';all.onclick=()=>{curScene='all';renderChips();renderPhrases()};box.appendChild(all);
+  SCENES.forEach(sc=>{const b=document.createElement('button');b.className='chip'+(curScene===sc.id?' on':'');b.textContent=sc.name;b.onclick=()=>{curScene=sc.id;renderChips();renderPhrases()};box.appendChild(b)});
+}
+function phraseCard(p){
+  const d=document.createElement('div');d.className='card';
+  d.innerHTML='<p class="scene">'+esc(p.sceneName)+'</p><p class="en">'+esc(p.en)+'</p><p class="ja">'+esc(p.ja)+'</p><div class="row"><button class="btn" data-say>🔊 発音</button><button class="btn fav'+(isFav(p.id)?' on':'')+'" data-fav>★</button></div>';
+  d.querySelector('[data-say]').onclick=()=>say(p.en);
+  d.querySelector('[data-fav]').onclick=()=>toggleFav(p.id);
+  return d;
+}
+function renderPhrases(){
+  const box=$('phraseList');box.innerHTML='';
+  PHRASES.filter(p=>curScene==='all'||p.scene===curScene).forEach(p=>box.appendChild(phraseCard(p)));
+}
+function renderFavs(){
+  const box=$('favList');box.innerHTML='';
+  const list=PHRASES.filter(p=>isFav(p.id));
+  if(!list.length){box.innerHTML='<p class="empty">まだお気に入りはありません。フレーズの★をタップして保存してください。</p>';return}
+  list.forEach(p=>box.appendChild(phraseCard(p)));
+}
+
+// ===== ナビ =====
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+  document.querySelectorAll('main section').forEach(s=>s.classList.remove('on'));
+  $(b.dataset.page).classList.add('on');
+  if(b.dataset.page==='fav')renderFavs();
+});
+
+// ===== ドリル（接客・瞬間英作文） =====
+function geminiKey(){return localStorage.getItem('salon_gemini_key')||localStorage.getItem('speakflow_gemini_key')||''}
+async function geminiText(prompt){
+  const key=geminiKey();
+  const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+encodeURIComponent(key),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});
+  if(!r.ok)throw new Error('Gemini error '+r.status);
+  const j=await r.json();
+  return (j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts||[]).map(p=>p.text||'').join('');
+}
+const DRILL_FALLBACK=[
+{jp:'今日はどのようなスタイルにしますか？',en:'How would you like your hair today?',pat:'希望を聞く'},
+{jp:'お湯の温度は大丈夫ですか？',en:'Is the water temperature OK?',pat:'確認する'},
+{jp:'サイドは短めにしますか？',en:'Would you like it shorter on the sides?',pat:'提案する'},
+{jp:'後ろを鏡でお見せしますね。',en:"I'll show you the back with a mirror.",pat:'案内する'},
+{jp:'次回のご予約を今日お取りしますか？',en:'Would you like to book your next appointment today?',pat:'予約を勧める'},
+{jp:'現金とカード、どちらにしますか？',en:'Cash or card?',pat:'選択を聞く'},
+{jp:'この色は数回洗うと少し落ちます。',en:'This color will fade a little after a few washes.',pat:'説明する'},
+{jp:'本日はありがとうございました。',en:'Thank you for coming today.',pat:'お礼を言う'},
+{jp:'週末はいかがでしたか？',en:'Did you have a good weekend?',pat:'雑談する'},
+{jp:'お待たせしてすみません。',en:"I'm sorry about the wait.",pat:'謝る'}];
+let drillQ=null,drillN=0,drillRecent=[];
+let drillStats={asked:0,correct:0,sum:0};
+try{Object.assign(drillStats,JSON.parse(localStorage.getItem('salon_drill_stats')||'{}'))}catch(e){}
+function saveDrillStats(){localStorage.setItem('salon_drill_stats',JSON.stringify(drillStats))}
+function showDrillStats(){const avg=drillStats.asked?Math.round(drillStats.sum/drillStats.asked):0;$('drillStats').textContent='これまで '+drillStats.asked+'問 ・ 正解 '+drillStats.correct+'問 ・ 平均 '+avg+'点'}
+function parseDrillQ(t){
+  const mQ=t.match(/Q:\s*(.+)/),mA=t.match(/A:\s*(.+)/),mP=t.match(/PATTERN:\s*(.+)/);
+  if(mQ&&mA)return{jp:mQ[1].trim(),en:mA[1].trim(),pat:mP?mP[1].trim():''};
+  const line=t.split('\n').map(s=>s.trim()).find(s=>/[\u3040-\u30ff\u4e00-\u9faf]/.test(s)&&!/[A-Za-z]{4,}/.test(s));
+  return line?{jp:line,en:'',pat:''}:null;
+}
+async function nextQuestion(){
+  $('drillStatus').textContent='問題を考えています…';
+  $('drillFeedback').style.display='none';$('drillNext').style.display='none';
+  $('drillInput').value='';$('drillSend').disabled=false;
+  let q=null;
+  if(geminiKey()){
+    try{
+      const pats=drillRecent.slice(-5).map(r=>r.pat).filter(Boolean).join('、');
+      const t=await geminiText('あなたは美容師専属の英会話コーチです。サロンでの接客で使う日本語を1文だけ出題してください。日常のサロン場面（お出迎え、カウンセリング、シャンプー、カット、カラー、仕上げ、お会計、次回予約、商品提案、雑談、トラブル対応）から選び、模範解答は15語以内にしてください。最近使った文型（'+pats+'）と重ならないようにしてください。必ず次の形式で出力してください。\nQ: （日本語1文）\nA: （英語の模範解答）\nPATTERN: （文型の名前を短く）');
+      q=parseDrillQ(t);
+      if(q&&q.en.split(/\s+/).length>18)q=null;
+    }catch(e){q=null}
+  }
+  if(!q){q=DRILL_FALLBACK[Math.floor(Math.random()*DRILL_FALLBACK.length)]}
+  drillQ=q;drillN++;
+  $('drillTurn').textContent='第'+drillN+'問';
+  $('drillQ').textContent=q.jp;
+  $('drillStatus').textContent='';
+}
+function parseFeedback(t){
+  const g=k=>{const m=t.match(new RegExp(k+':\\s*([\\s\\S]*?)(?=\\n(?:SCORE|GOOD|FIX|NATURAL|NATIVE|POINT):|$)'));return m?m[1].trim():''};
+  return{score:g('SCORE'),good:g('GOOD'),fix:g('FIX'),natural:g('NATURAL'),native:g('NATIVE'),point:g('POINT')};
+}
+async function grade(){
+  const ans=$('drillInput').value.trim();
+  if(!ans){$('drillStatus').textContent='英語で答えを入力してください。';return}
+  $('drillSend').disabled=true;$('drillStatus').textContent='採点しています…';
+  const fb=$('drillFeedback');
+  const show=(html)=>{fb.innerHTML=html;fb.style.display='block';$('drillNext').style.display='inline-block';$('drillStatus').textContent=''};
+  const model=drillQ.en;
+  const record=(score)=>{
+    drillStats.asked++;drillStats.sum+=score;if(score>=70)drillStats.correct++;
+    saveDrillStats();showDrillStats();
+    drillRecent.push({jp:drillQ.jp,en:model,ans,score,pat:drillQ.pat||''});
+  };
+  if(!geminiKey()){
+    const ok=ans.toLowerCase().replace(/[^a-z ]/g,'').trim()===model.toLowerCase().replace(/[^a-z ]/g,'').trim();
+    record(ok?100:70);
+    show('<h3>あなたの答え</h3><p>'+esc(ans)+'</p><h3>模範解答 <button class="btn" onclick="say(\''+esc(model).replace(/'/g,"\\'")+'\')">🔊</button></h3><p>'+esc(model)+'</p><p class="hint">'+(ok?'ぴったりです！':'模範解答と比べてみてください。キーを登録するとAIが詳しく採点します。')+'</p>');
+    return;
+  }
+  try{
+    const t=await geminiText('あなたは美容師専属の英会話コーチです。次の瞬間英作文を採点してください。解説は日本語で。\n日本語：'+drillQ.jp+'\n模範解答：'+model+'\n生徒の答え：'+ans+'\n必ず次の形式で出力してください。\nSCORE: （0〜100の数字だけ）\nGOOD: （良かった点）\nFIX: （文法ミスの修正。なければ「なし」）\nNATURAL: （より自然な言い方）\nNATIVE: （ネイティブがよく使う表現）\nPOINT: （覚えておきたいポイント）');
+    const f=parseFeedback(t);
+    const score=parseInt(f.score,10);
+    if(isNaN(score)||(!f.good&&!f.fix&&!f.natural))throw new Error('parse fail');
+    record(score);
+    show('<p><span class="score">'+score+'点</span></p><p><span class="lab">あなたの答え：</span>'+esc(ans)+'</p><p><span class="lab">模範解答：</span>'+esc(model)+' <button class="btn" onclick="say(\''+esc(model).replace(/'/g,"\\'")+'\')">🔊</button></p><p><span class="lab">良かった点：</span>'+esc(f.good)+'</p><p><span class="lab">文法ミスの修正：</span>'+esc(f.fix)+'</p><p><span class="lab">より自然な言い方：</span>'+esc(f.natural)+'</p><p><span class="lab">ネイティブがよく使う表現：</span>'+esc(f.native)+'</p><p><span class="lab">覚えておきたいポイント：</span>'+esc(f.point)+'</p>');
+  }catch(e){
+    record(70);
+    show('<h3>あなたの答え</h3><p>'+esc(ans)+'</p><h3>模範解答 <button class="btn" onclick="say(\''+esc(model).replace(/'/g,"\\'")+'\')">🔊</button></h3><p>'+esc(model)+'</p><p class="hint">採点に失敗しました。模範解答と比べてみてください。</p>');
+  }
+}
+$('saveKey').onclick=()=>{
+  const k=$('geminiKey').value.trim();
+  if(!k){$('keyStatus').textContent='キーを入力してください。';return}
+  localStorage.setItem('salon_gemini_key',k);
+  $('keyStatus').textContent='保存しました。';initDrill();
+};
+$('startNoKey').onclick=()=>{startDrill()};
+$('drillStart').onclick=()=>{startDrill()};
+$('drillSend').onclick=()=>{grade()};
+$('drillNext').onclick=()=>{nextQuestion()};
+$('drillQuit').onclick=()=>{$('drillMain').style.display='none';$('drillSetup').style.display='block';showDrillStats()};
+function startDrill(){
+  $('drillNoKey').style.display='none';$('drillSetup').style.display='none';$('drillMain').style.display='block';
+  drillN=0;nextQuestion();
+}
+function initDrill(){
+  if(geminiKey()){$('drillNoKey').style.display='none';$('drillSetup').style.display='block';showDrillStats()}
+  else{$('drillNoKey').style.display='block';$('drillSetup').style.display='none'}
+}
+renderChips();renderPhrases();renderFavs();initDrill();
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{})}
+</script>
+</body>
+</html>
