@@ -47,6 +47,9 @@ textarea{min-height:64px}
 .stats{font-size:13px;color:#6b7280;margin:8px 0}
 .empty{color:#6b7280;font-size:14px;text-align:center;padding:24px 0}
 footer{font-size:12px;color:#9ca3af;text-align:center;padding:20px 0}
+.iconbtn{padding:6px 10px;border-radius:8px;border:1px solid #e5e7eb;background:#fff;font-size:14px;cursor:pointer;color:#6b7280}
+.badge{display:inline-block;background:#fdf2f8;color:#db2777;font-size:11px;font-weight:700;border-radius:999px;padding:1px 8px;margin-left:6px;vertical-align:middle}
+.formcard label{font-size:13px;font-weight:700;color:#374151}
 </style>
 </head>
 <body>
@@ -64,7 +67,22 @@ footer{font-size:12px;color:#9ca3af;text-align:center;padding:20px 0}
 <main>
 <section id="phrases" class="on">
 <h2>シーン別フレーズ集</h2>
-<p class="hint">場面を選んで、英語フレーズを確認。🔊で発音、★でお気に入りに保存できます。💡は使い方のポイントです。</p>
+<p class="hint">場面を選んで、英語フレーズを確認。🔊で発音、★でお気に入りに保存できます。💡は使い方のポイントです。カードの✏️で編集、🗑️で削除もできます。</p>
+<button class="btn primary" id="addPhraseBtn">＋ フレーズを追加</button>
+<div class="card formcard" id="phraseForm" style="display:none;margin-top:12px">
+<label>シーン</label>
+<select id="fScene"></select>
+<label>英語</label>
+<textarea id="fEn" placeholder="例：Would you like a head massage?"></textarea>
+<label>日本語</label>
+<input id="fJa" placeholder="例：頭のマッサージはいかがですか？">
+<label>分類（任意）</label>
+<input id="fSub" placeholder="例：マッサージ">
+<label>ヒント（任意）</label>
+<input id="fTip" placeholder="例：言い換えや注意点">
+<p class="hint" id="fStatus"></p>
+<div class="row"><button class="btn primary" id="fSave">保存する</button><button class="btn" id="fCancel">キャンセル</button></div>
+</div>
 <div class="chips" id="sceneChips"></div>
 <div id="phraseList"></div>
 </section>
@@ -122,16 +140,22 @@ footer{font-size:12px;color:#9ca3af;text-align:center;padding:20px 0}
 <p><b>Gemini APIキー</b>：Google AI Studioで無料で取得できます。キーはこのスマホの中だけに保存され、外部に送信されません。</p>
 <p><b>フレーズについて</b>：教科書英語ではなく、現場でネイティブが実際に使う自然な表現を集めています。カラー・パーマは種類別、シャンプーは9つの場面に分けてあります。施術前の安全確認と、料金・時間・できないことの伝え方も入っています。</p>
 </div>
+<div class="card">
+<p><b>フレーズの追加・編集・削除</b>：フレーズのカードにある✏️で編集、🗑️で削除できます。「＋ フレーズを追加」で自分のフレーズを作れます。自分のフレーズには「自作」と表示されます。削除した元のフレーズは、下のボタンで元に戻せます。</p>
+<p class="hint" id="dataStatus"></p>
+<button class="btn" id="restoreDeleted">削除したフレーズを元に戻す</button>
+<button class="btn" id="clearCustom">自作フレーズをすべて削除</button>
+<p class="hint">追加・編集・削除した内容は、このスマホの中だけに保存されます。アプリを消すと消えてしまうので、大切なフレーズはメモなどに控えておいてください。</p></div>
 </section>
 </main>
-<footer>Salon English v2.1 — 無料のPWAです</footer>
+<footer>Salon English v2.2 — 無料のPWAです</footer>
 <script>
 const $=id=>document.getElementById(id);
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function toast(s){const t=document.createElement('div');t.textContent=s;t.style.cssText='position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1f2937;color:#fff;padding:10px 16px;border-radius:999px;font-size:14px;z-index:99';document.body.appendChild(t);setTimeout(()=>t.remove(),2200)}
 function say(t){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-US';speechSynthesis.speak(u)}catch(e){}}
 
-// ===== フレーズデータ（v2.0：現場で使う自然な表現に作り直し） =====
+// ===== フレーズデータ（v2.2：追加・編集・削除に対応） =====
 // 形式：[英語, 日本語, 小分類（任意）, ポイント（任意）]
 const SCENES=[
 {id:'welcome',name:'お出迎え・受付',items:[
@@ -366,8 +390,31 @@ const SCENES=[
 ["Here is what I can do today, and here is what would need to happen later.",'今日できることと、後日必要なことをお伝えしますね。']]}
 ];
 
-const PHRASES=[];
-SCENES.forEach(sc=>sc.items.forEach((it,i)=>PHRASES.push({id:sc.id+'-'+i,scene:sc.id,sceneName:sc.name,en:it[0],ja:it[1],sub:it[2]||'',tip:it[3]||''})));
+// ===== 自分のフレーズ（追加・編集・削除） =====
+function loadJSON(k,fb){try{const v=JSON.parse(localStorage.getItem(k)||'');return v==null?fb:v}catch(e){return fb}}
+let customPhrases=loadJSON('salon_custom_phrases',[]);
+let deletedIds=loadJSON('salon_deleted_phrases',[]);
+let phraseEdits=loadJSON('salon_edits',{});
+function saveCustom(){localStorage.setItem('salon_custom_phrases',JSON.stringify(customPhrases))}
+function saveDeleted(){localStorage.setItem('salon_deleted_phrases',JSON.stringify(deletedIds))}
+function saveEdits(){localStorage.setItem('salon_edits',JSON.stringify(phraseEdits))}
+let PHRASES=[];
+function buildPhrases(){
+  PHRASES=[];
+  SCENES.forEach(sc=>sc.items.forEach((it,i)=>{
+    const id=sc.id+'-'+i;
+    if(deletedIds.includes(id))return;
+    const ed=phraseEdits[id]||{};
+    PHRASES.push({id,scene:sc.id,sceneName:sc.name,en:ed.en||it[0],ja:ed.ja||it[1],sub:ed.sub!==undefined?ed.sub:(it[2]||''),tip:ed.tip!==undefined?ed.tip:(it[3]||''),custom:false});
+  }));
+  customPhrases.forEach(cp=>{
+    const sc=SCENES.find(s=>s.id===cp.scene)||SCENES[0];
+    PHRASES.push({id:cp.id,scene:cp.scene,sceneName:sc.name,en:cp.en,ja:cp.ja,sub:cp.sub||'',tip:cp.tip||'',custom:true});
+  });
+}
+function refreshPhrases(){buildPhrases();renderChips();renderPhrases();renderFavs();updateDataStatus()}
+buildPhrases();
+
 
 // ===== お気に入り =====
 let favs=[];try{favs=JSON.parse(localStorage.getItem('salon_favs')||'[]')}catch(e){favs=[]}
@@ -380,16 +427,18 @@ let curScene='all';
 function renderChips(){
   const box=$('sceneChips');box.innerHTML='';
   const all=document.createElement('button');all.className='chip'+(curScene==='all'?' on':'');all.textContent='すべて ('+PHRASES.length+')';all.onclick=()=>{curScene='all';renderChips();renderPhrases()};box.appendChild(all);
-  SCENES.forEach(sc=>{const b=document.createElement('button');b.className='chip'+(curScene===sc.id?' on':'');b.textContent=sc.name+' ('+sc.items.length+')';b.onclick=()=>{curScene=sc.id;renderChips();renderPhrases()};box.appendChild(b)});
+  SCENES.forEach(sc=>{const b=document.createElement('button');b.className='chip'+(curScene===sc.id?' on':'');b.textContent=sc.name+' ('+PHRASES.filter(p=>p.scene===sc.id).length+')';b.onclick=()=>{curScene=sc.id;renderChips();renderPhrases()};box.appendChild(b)});
 }
 function phraseCard(p){
   const d=document.createElement('div');d.className='card';
-  let h='<p class="scene">'+esc(p.sceneName)+(p.sub?' · '+esc(p.sub):'')+'</p><p class="en">'+esc(p.en)+'</p><p class="ja">'+esc(p.ja)+'</p>';
+  let h='<p class="scene">'+esc(p.sceneName)+(p.sub?' · '+esc(p.sub):'')+(p.custom?'<span class="badge">自作</span>':'')+'</p><p class="en">'+esc(p.en)+'</p><p class="ja">'+esc(p.ja)+'</p>';
   if(p.tip)h+='<p class="tip">💡 '+esc(p.tip)+'</p>';
-  h+='<div class="row"><button class="btn" data-say>🔊 発音</button><button class="btn fav'+(isFav(p.id)?' on':'')+'" data-fav>★</button></div>';
+  h+='<div class="row"><button class="btn" data-say>🔊 発音</button><button class="btn fav'+(isFav(p.id)?' on':'')+'" data-fav>★</button><button class="iconbtn" data-edit title="編集">✏️</button><button class="iconbtn" data-del title="削除">🗑️</button></div>';
   d.innerHTML=h;
   d.querySelector('[data-say]').onclick=()=>say(p.en);
   d.querySelector('[data-fav]').onclick=()=>toggleFav(p.id);
+  d.querySelector('[data-edit]').onclick=()=>editPhrase(p.id);
+  d.querySelector('[data-del]').onclick=()=>deletePhrase(p.id);
   return d;
 }
 function renderPhrases(){
@@ -402,6 +451,67 @@ function renderFavs(){
   if(!list.length){box.innerHTML='<p class="empty">まだお気に入りはありません。フレーズの★をタップして保存してください。</p>';return}
   list.forEach(p=>box.appendChild(phraseCard(p)));
 }
+
+
+// ===== フレーズの追加・編集・削除（フォーム） =====
+let editingId=null;
+function fillSceneSelect(){const s=$('fScene');s.innerHTML='';SCENES.forEach(sc=>{const o=document.createElement('option');o.value=sc.id;o.textContent=sc.name;s.appendChild(o)})}
+function openPhraseForm(id){
+  fillSceneSelect();
+  const p=id?PHRASES.find(x=>x.id===id):null;
+  editingId=id||null;
+  $('fScene').disabled=!!(p&&!p.custom);
+  $('fScene').value=p?p.scene:(curScene==='all'?'welcome':curScene);
+  $('fEn').value=p?p.en:'';
+  $('fJa').value=p?p.ja:'';
+  $('fSub').value=p?p.sub:'';
+  $('fTip').value=p?p.tip:'';
+  $('fStatus').textContent=p?(p.custom?'自作フレーズを編集中です。':'元のフレーズを編集中です。保存すると上書きされます。'):'新しいフレーズを追加します。';
+  $('phraseForm').style.display='block';
+  try{$('phraseForm').scrollIntoView({behavior:'smooth',block:'nearest'})}catch(e){}
+}
+function closePhraseForm(){$('phraseForm').style.display='none';editingId=null}
+function savePhraseForm(){
+  const en=$('fEn').value.trim(),ja=$('fJa').value.trim();
+  if(!en||!ja){$('fStatus').textContent='英語と日本語の両方を入力してください。';return}
+  const data={scene:$('fScene').value,en,ja,sub:$('fSub').value.trim(),tip:$('fTip').value.trim()};
+  if(editingId){
+    const cp=customPhrases.find(c=>c.id===editingId);
+    if(cp){Object.assign(cp,data);saveCustom()}
+    else{phraseEdits[editingId]={en,ja,sub:data.sub,tip:data.tip};saveEdits()}
+    toast('フレーズを更新しました');
+  }else{
+    customPhrases.push(Object.assign({id:'c'+Date.now().toString(36)+Math.floor(Math.random()*1000)},data));
+    saveCustom();
+    toast('フレーズを追加しました');
+  }
+  closePhraseForm();refreshPhrases();
+}
+function editPhrase(id){openPhraseForm(id)}
+function deletePhrase(id){
+  const p=PHRASES.find(x=>x.id===id);if(!p)return;
+  if(!confirm('「'+p.en+'」を削除しますか？'+(p.custom?'':'元のフレーズは「使い方」タブから元に戻せます。')))return;
+  if(p.custom){customPhrases=customPhrases.filter(c=>c.id!==id);saveCustom()}
+  else{if(!deletedIds.includes(id)){deletedIds.push(id);saveDeleted()}}
+  favs=favs.filter(f=>f!==id);saveFavs();
+  toast('フレーズを削除しました');refreshPhrases();
+}
+function updateDataStatus(){
+  const el=$('dataStatus');if(!el)return;
+  el.textContent='自作フレーズ：'+customPhrases.length+'件 ／ 削除した元のフレーズ：'+deletedIds.length+'件';
+}
+$('addPhraseBtn').onclick=()=>{const f=$('phraseForm');if(f.style.display==='block'){closePhraseForm()}else{openPhraseForm(null)}};
+$('fSave').onclick=savePhraseForm;
+$('fCancel').onclick=closePhraseForm;
+$('restoreDeleted').onclick=()=>{deletedIds=[];saveDeleted();toast('削除したフレーズを元に戻しました');refreshPhrases()};
+$('clearCustom').onclick=()=>{
+  if(!customPhrases.length){toast('自作フレーズはありません');return}
+  if(!confirm('自作フレーズを'+customPhrases.length+'件すべて削除しますか？'))return;
+  const ids=customPhrases.map(c=>c.id);customPhrases=[];saveCustom();
+  favs=favs.filter(f=>!ids.includes(f));saveFavs();
+  toast('自作フレーズをすべて削除しました');refreshPhrases();
+};
+updateDataStatus();
 
 // ===== 単語集 =====
 const VOCAB=[
