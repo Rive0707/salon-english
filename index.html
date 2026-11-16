@@ -148,7 +148,7 @@ footer{font-size:12px;color:#9ca3af;text-align:center;padding:20px 0}
 <p class="hint">追加・編集・削除した内容は、このスマホの中だけに保存されます。アプリを消すと消えてしまうので、大切なフレーズはメモなどに控えておいてください。</p></div>
 </section>
 </main>
-<footer>Salon English v2.2 — 無料のPWAです</footer>
+<footer>Salon English v2.3 — 無料のPWAです</footer>
 <script>
 const $=id=>document.getElementById(id);
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -194,7 +194,20 @@ const SCENES=[
 ["Let's check the price before we start.",'始める前に料金を確認しておきましょう。'],
 ["What brings you in today?",'今日はどういったご用件ですか？'],
 ["What do you like about this photo, and what would you change about it for yourself?",'この写真の好きなところと、ご自分用に変えたいところを教えてください。'],
-["Did I get that right?",'合っていますか？','','要望を復唱して確認する習慣']]},
+["Did I get that right?",'合っていますか？','','要望を復唱して確認する習慣'],
+["How about this length?",'これくらいの長さはどうですか？','','手で長さを示しながら聞く'],
+["It's about an inch.",'だいたい1インチ（約2.5cm）くらいです。','','アメリカではインチで長さを伝える'],
+["Do you prefer butterfly layers or soft layers?",'バタフライレイヤーとソフトレイヤー、どちらがいいですか？','','butterfly layers＝顔まわりに動きのあるレイヤー'],
+["I'll show you some pictures.",'写真をお見せしますね。'],
+["Could you suggest what you'd recommend?",'おすすめを教えてもらえますか？','お客様のセリフ'],
+["It's up to you.",'おまかせします。','お客様のセリフ'],
+["What length suits me?",'どんな長さが似合いますか？','お客様のセリフ'],
+["What suits my face shape?",'私の顔の形に合うのは何ですか？','お客様のセリフ'],
+["I'd like to hide my forehead.",'おでこを隠したいです。','お客様のセリフ'],
+["Bangs would suit you, but I don't recommend them because you'd need to blow-dry and style them every day. If you're okay with that, I'll cut them for you.",'前髪は似合うと思います。ただ毎日ブロードライとスタイリングが必要なので、その点が大丈夫なら切りますよ。','','前髪の維持費を正直に伝える'],
+["I'll add layers from here to here.",'ここからここまでレイヤーを入れますね。','','手で範囲を示しながら'],
+["I trust you.",'信頼しています。おまかせします。','お客様のセリフ'],
+["I'll leave it to you.",'おまかせします。','お客様のセリフ']]},
 {id:'shampoo',name:'シャンプー',items:[
 ["Let's head over to the shampoo bowls.",'シャンプー台へご案内しますね。','案内・姿勢','shampoo bowl＝シャンプー台'],
 ["Go ahead and rest your neck right in the bowl. How does that feel?",'首をボウルにあずけてください。違和感はありませんか？','案内・姿勢'],
@@ -235,7 +248,12 @@ const SCENES=[
 ["Could you tilt your head down slightly?",'少し下を向いていただけますか？'],
 ["Do you prefer a middle part or a side part?",'センター分けとサイド分け、どちらがお好みですか？'],
 ["I'll blend the layers so there are no harsh lines.",'不自然な段差が出ないようにレイヤーをなじませます。'],
-["I'll check with you before taking more off.",'もっと切る前に確認しますね。']]},
+["I'll check with you before taking more off.",'もっと切る前に確認しますね。'],
+["I feel my hair is thick.",'髪が多いと感じます。','お客様のセリフ'],
+["Can you make the texture thinner?",'質感を軽くできますか？','お客様のセリフ'],
+["Your hair is thick, so I can't thin it out too much.",'髪が多いので、すきすぎることはできません。'],
+["My hair is so thin. It's hard to get volume with my haircut.",'髪がすごく少なくて、カットでボリュームを出すのが難しいです。','お客様のセリフ'],
+["I'd like more body.",'ボリューム（ハリ）がほしいです。','お客様のセリフ','body＝髪のハリ・ボリューム']]},
 {id:'color',name:'カラー',items:[
 ["What kind of color did you have in mind?",'どんな色にしますか？','カウンセリング'],
 ["Is this the kind of color you're going for?",'こんな色にしますか？','カウンセリング'],

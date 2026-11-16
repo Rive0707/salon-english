@@ -1,3 +1,27 @@
+Salon English v2.3 — 美容師の接客英語（2026-11-16）
+
+v2.3（2026-11-16）の変更：Google Keep メモのフレーズを18本追加
+- Rioさんの Keep メモ（カウンセリング・カットで実際に使う英語）を
+  正しい英語に直して追加。メモのスペルミスも修正済み
+  （adout→about、sujjest→suggest、feer→feel、tecstuar→texture、
+  thiner→thinner、dly→dry）
+- カウンセリング 25→38本：「How about this length?」（これくらいの
+  長さはどう？）、「It's about an inch.」（約2.5cm）、
+  「Do you prefer butterfly layers or soft layers?」、
+  「I'll show you some pictures.」、前髪の正直なアドバイス
+  （毎日ブロードライとスタイリングが必要な話）、
+  「I'll add layers from here to here.」など
+- カット 16→21本：「I feel my hair is thick.」、
+  「Can you make the texture thinner?」、
+  「Your hair is thick, so I can't thin it out too much.」、
+  「My hair is so thin. It's hard to get volume with my haircut.」、
+  「I'd like more body.」（body＝髪のハリ・ボリューム）
+- お客様のセリフも追加（「お客様のセリフ」と表示）：
+  「It's up to you.」「I trust you.」「I'll leave it to you.」
+  （おまかせします）、「What length suits me?」、
+  「What suits my face shape?」、「I'd like to hide my forehead.」
+- フレーズ 215→233本。SWキャッシュを salon-v6 に上げた
+
 Salon English v2.2 — 美容師の接客英語（2026-11-15）
 
 v2.2（2026-11-15）の変更：フレーズの追加・編集・削除ができるように
