@@ -59,6 +59,7 @@ footer{font-size:12px;color:#9ca3af;text-align:center;padding:20px 0}
 </header>
 <nav>
 <button data-page="phrases" class="on">💬 フレーズ</button>
+<button data-page="customer">🗣️ お客様のセリフ</button>
 <button data-page="drill">✍️ ドリル</button>
 <button data-page="vocab">📖 単語</button>
 <button data-page="fav">★ お気に入り</button>
@@ -85,6 +86,12 @@ footer{font-size:12px;color:#9ca3af;text-align:center;padding:20px 0}
 </div>
 <div class="chips" id="sceneChips"></div>
 <div id="phraseList"></div>
+</section>
+
+<section id="customer">
+<h2>お客様のセリフ → こう返す</h2>
+<p class="hint">お客様がこう言ったら、こう返す。お客様のセリフ（22本）と返信例をセットで見れます。🔊で発音を確認できます。返信例は参考文です（ネイティブチェックなし）。</p>
+<div id="customerList"></div>
 </section>
 
 <section id="drill">
@@ -136,6 +143,7 @@ footer{font-size:12px;color:#9ca3af;text-align:center;padding:20px 0}
 <p><b>フレーズ</b>：シーンを選んで英語と日本語を確認。🔊で発音を聞けます。★でお気に入りへ。💡は、場面ごとの使い分けや、間違えやすいポイントです。</p>
 <p><b>単語</b>：髪型・カラー・髪質・カット技法・頭皮・予約・仕上がりの表現など、サロンで使う単語集です。</p>
 <p><b>ドリル</b>：日本語の場面を見て、英語で答える練習です。Geminiが採点して、良い点・直すところ・自然な言い方を教えてくれます。</p>
+<p><b>お客様のセリフ</b>：お客様が言った英語と、その意味、こう返すという返信例をセットで見れます。お客様の言葉を聞き取って、すぐ返したいときに使います。</p>
 <p><b>ホーム画面に追加</b>：Chromeのメニューから「ホーム画面に追加」で、アプリのように使えます。</p>
 <p><b>Gemini APIキー</b>：Google AI Studioで無料で取得できます。キーはこのスマホの中だけに保存され、外部に送信されません。</p>
 <p><b>フレーズについて</b>：教科書英語ではなく、現場でネイティブが実際に使う自然な表現を集めています。カラー・パーマは種類別、シャンプーは9つの場面に分けてあります。施術前の安全確認と、料金・時間・できないことの伝え方も入っています。</p>
@@ -148,7 +156,7 @@ footer{font-size:12px;color:#9ca3af;text-align:center;padding:20px 0}
 <p class="hint">追加・編集・削除した内容は、このスマホの中だけに保存されます。アプリを消すと消えてしまうので、大切なフレーズはメモなどに控えておいてください。</p></div>
 </section>
 </main>
-<footer>Salon English v2.4 — 無料のPWAです</footer>
+<footer>Salon English v2.5 — 無料のPWAです</footer>
 <script>
 const $=id=>document.getElementById(id);
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -517,7 +525,7 @@ function buildPhrases(){
     PHRASES.push({id:cp.id,scene:cp.scene,sceneName:sc.name,en:cp.en,ja:cp.ja,sub:cp.sub||'',tip:cp.tip||'',custom:true});
   });
 }
-function refreshPhrases(){buildPhrases();renderChips();renderPhrases();renderFavs();updateDataStatus()}
+function refreshPhrases(){buildPhrases();renderChips();renderPhrases();renderFavs();renderCustomer();updateDataStatus()}
 buildPhrases();
 
 
@@ -555,6 +563,49 @@ function renderFavs(){
   const list=PHRASES.filter(p=>isFav(p.id));
   if(!list.length){box.innerHTML='<p class="empty">まだお気に入りはありません。フレーズの★をタップして保存してください。</p>';return}
   list.forEach(p=>box.appendChild(phraseCard(p)));
+}
+
+// ===== お客様のセリフ → こう返す =====
+const REPLIES={
+"Could you suggest what you'd recommend?":["Of course — let me suggest something that suits your face shape.","もちろんです。顔の形に合うものをご提案しますね。"],
+"It's up to you.":["Leave it to me — I'll make it look great.","おまかせください。きれいに仕上げますね。"],
+"What length suits me?":["I think a little shorter would suit you — it would frame your face nicely.","少し短めが似合うと思います。顔まわりがきれいに見えますよ。"],
+"What suits my face shape?":["Layers around your face would suit your face shape really well.","顔まわりのレイヤーがお顔の形にとても合うと思いますよ。"],
+"My forehead is quite wide, so I'd like to hide it. What can I do? Besides bangs, what hairstyle would hide my forehead?":["Side-swept bangs or face-framing layers would cover it nicely without full bangs.","横に流す前髪や顔まわりのレイヤーなら、前髪を作らずにおでこをカバーできますよ。"],
+"I trust you.":["Thank you! I'll take good care of you.","ありがとうございます！おまかせください。"],
+"I'll leave it to you.":["Leave it to me — I'll make it look great.","おまかせください。きれいに仕上げますね。"],
+"How long will it take?":["It will take about two hours.","だいたい2時間くらいです。"],
+"Since my current hair color is very dark and close to black, I don't think it will take a lighter color.":["You're right — black dye is hard to lift. Let's check how light we can go.","その通りで、黒染めは明るくしにくいんです。どこまで明るくなるか確認しましょう。"],
+"Since I've dyed my hair black, I'm not sure if it will get as bright as the photo.":["It may not get quite as bright as the photo, but we can get close — let's do a strand test first.","写真ほど明るくならないかもしれませんが、近づけることはできます。まず毛束テストをしましょう。"],
+"Just a little trim and some layers, and maybe curtain bangs.":["Got it — a small trim, some layers, and curtain bangs.","分かりました。少し整えて、レイヤーとカーテンバングですね。"],
+"Maybe an inch?":["An inch sounds good — I'll take about that much off.","1インチですね。そのくらい切りますね。"],
+"I feel my hair is thick.":["I'll thin it out a little so it feels lighter.","少しすいて軽くしますね。"],
+"Can you make the texture thinner?":["Of course — I'll thin it out and adjust the texture.","もちろんです。すいて質感を調整しますね。"],
+"My hair is so thin. It's hard to get volume with my haircut.":["I'll add some layers to create more volume.","レイヤーを入れてボリュームを出しますね。"],
+"I'd like more body.":["I'll add some layers to give it more body.","レイヤーを入れてハリを出しますね。"],
+"Can you bleach just the ends to match the reference photo without bleaching the roots?":["Yes, we can bleach just the ends — but the roots will stay darker.","はい、毛先だけブリーチできます。ただ根元は暗いままになりますよ。"],
+"Last time I was told not to bleach because it damages the hair. What about this time? Is it okay to bleach?":["Bleach does cause some damage, but we can use a gentler formula and a treatment after.","ブリーチは傷みますが、やさしい薬剤とトリートメントでケアできますよ。"],
+"What is a straight perm?":["It's a treatment that permanently straightens your hair using a chemical solution and a flat iron.","薬剤とアイロンで髪をまっすぐにする施術です。"],
+"I'm planning to curl my hair with a perm tomorrow. Will this hairstyle be okay for that?":["Yes, this length works well with curls — it will look great.","はい、この長さならカールがきれいに出ますよ。"],
+"Can you finish it off by straightening it with a flat iron?":["Of course — I'll finish it with the flat iron.","もちろんです。最後にアイロンで仕上げますね。"],
+"They told me your treatment doesn't damage hair at all, so that's why I came here.":["Our treatment is very gentle, but no chemical treatment is completely damage-free — I'll use the gentlest formula for your hair.","うちのトリートメントはとてもやさしいですが、完全にノーダメージというわけではありません。あなたの髪に一番やさしい薬剤を使いますね。"],
+};
+function renderCustomer(){
+  const box=$('customerList');box.innerHTML='';
+  const list=PHRASES.filter(p=>p.sub==='お客様のセリフ');
+  if(!list.length){box.innerHTML='<p class="empty">お客様のセリフはまだありません。</p>';return}
+  list.forEach(p=>{
+    const r=REPLIES[p.en];
+    const d=document.createElement('div');d.className='card';
+    let h='<p class="scene">'+esc(p.sceneName)+' · お客様のセリフ</p><p class="en">'+esc(p.en)+'</p><p class="ja">'+esc(p.ja)+'</p>';
+    if(r)h+='<p class="scene">→ こう返す</p><p class="en">'+esc(r[0])+'</p><p class="ja">'+esc(r[1])+'</p>';
+    else h+='<p class="tip">返信例はまだありません。</p>';
+    h+='<div class="row"><button class="btn" data-say>🔊 お客様のセリフ</button>'+(r?'<button class="btn" data-say2>🔊 返信</button>':'')+'</div>';
+    d.innerHTML=h;
+    d.querySelector('[data-say]').onclick=()=>say(p.en);
+    const b2=d.querySelector('[data-say2]');if(b2)b2.onclick=()=>say(r[0]);
+    box.appendChild(d);
+  });
 }
 
 
@@ -773,7 +824,7 @@ function initDrill(){
   if(geminiKey()){$('drillNoKey').style.display='none';$('drillSetup').style.display='block';showDrillStats()}
   else{$('drillNoKey').style.display='block';$('drillSetup').style.display='none'}
 }
-renderChips();renderPhrases();renderFavs();renderVocabChips();renderVocab();initDrill();
+renderChips();renderPhrases();renderFavs();renderCustomer();renderVocabChips();renderVocab();initDrill();
 if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{})}
 </script>
 </body>
