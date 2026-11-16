@@ -156,7 +156,7 @@ footer{font-size:12px;color:#9ca3af;text-align:center;padding:20px 0}
 <p class="hint">追加・編集・削除した内容は、このスマホの中だけに保存されます。アプリを消すと消えてしまうので、大切なフレーズはメモなどに控えておいてください。</p></div>
 </section>
 </main>
-<footer>Salon English v2.5 — 無料のPWAです</footer>
+<footer>Salon English v2.6 — 無料のPWAです</footer>
 <script>
 const $=id=>document.getElementById(id);
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -250,7 +250,22 @@ const SCENES=[
 ["If you want to get bangs, I recommend getting a hair-straightening treatment for your fringe. That way, it will naturally fall forward without you even needing to blow-dry it.",'前髪を作るなら、前髪だけのストレート（縮毛矯正）がおすすめです。そうすればブロードライなしでも自然に前に落ちますよ。','','fringe＝前髪（イギリス英語）'],
 ["To get bangs like the ones in the photo, you probably need to blow-dry and stretch them out, otherwise they tend to split.",'写真の前髪にするには、ブロードライで伸ばさないと割れやすいですよ。'],
 ["How would you like the rest of your hair styled besides your bangs?",'前髪以外はどうセットしますか？'],
-["Would you like your bangs styled like the photo?",'前髪は写真みたいにしますか？']]},{id:'shampoo',name:'シャンプー',items:[
+["Would you like your bangs styled like the photo?",'前髪は写真みたいにしますか？'],
+["Did you dye your hair before?",'以前に染めたことはありますか？'],
+["Is this your virgin hair?",'染めたことのないバージンヘアですか？','','virgin hair＝染めたことのない髪'],
+["Have you had this style before?",'このスタイルにしたことはありますか？'],
+["How long was it last time?",'前回はどれくらいの長さでしたか？'],
+["How bright do you want it?",'どれくらい明るくしたいですか？'],
+["Do you prefer a more natural shade, or a little deeper?",'もっと自然な色がいいですか、それとも少し深めがいいですか？'],
+["I'd recommend going a little deeper — it will fade nicely and suit your skin tone.",'少し深めがおすすめです。きれいに色落ちしますし、肌の色にも合いますよ。'],
+["Are you open to my suggestion?",'私の提案でもいいですか？'],
+["Let me talk you through the color placement.",'カラーの配置を説明しますね。'],
+["Your natural waves will give this style a nice shape.",'自然なクセがこのスタイルにいい形を出してくれますよ。'],
+["Don't worry — it will grow out fast.",'大丈夫ですよ、すぐ伸びますから。'],
+["Let me confirm the design and where to place it.",'デザインと入れる場所を確認させてください。'],
+["I want something refreshing.",'さっぱりした感じにしたいです。','お客様のセリフ'],
+["I brought a picture of the design I want.",'やりたいデザインの写真を持ってきました。','お客様のセリフ'],
+["The bangs in the photo are a little too short for me.",'写真の前髪は私には少し短すぎます。','お客様のセリフ']]},{id:'shampoo',name:'シャンプー',items:[
 ["Let's head over to the shampoo bowls.",'シャンプー台へご案内しますね。','案内・姿勢','shampoo bowl＝シャンプー台'],
 ["Go ahead and rest your neck right in the bowl. How does that feel?",'首をボウルにあずけてください。違和感はありませんか？','案内・姿勢'],
 ["Please take off your glasses and put them right here.",'メガネを外してこちらに置いてください。','案内・姿勢'],
@@ -308,7 +323,11 @@ const SCENES=[
 ["Are both sides even?",'両側の高さは均等ですか？'],
 ["I'm concerned about the damage up to this point. I think it would be much easier to manage once it gets to around here.",'ここまでのダメージが気になります。ここくらいまで伸びれば、ずっと扱いやすくなると思いますよ。'],
 ["Would you like me to cut the bangs, trim the back a bit, and adjust the volume?",'前髪を切って、後ろを少し整えて、ボリュームを調整しますか？'],
-["In the photo, your hair is longer, so right now we'd only need a slight trim. Is that alright with you?",'写真ではもっと長いので、今は少し整えるだけでいいと思います。大丈夫ですか？']]},{id:'color',name:'カラー',items:[
+["In the photo, your hair is longer, so right now we'd only need a slight trim. Is that alright with you?",'写真ではもっと長いので、今は少し整えるだけでいいと思います。大丈夫ですか？'],
+["I want it thinner at the bottom.",'下のほうを軽くしたいです。','お客様のセリフ'],
+["I want to keep enough length to tie it up.",'結べる長さは残したいです。','お客様のセリフ'],
+["Please don't cut it too short.",'短く切りすぎないでください。','お客様のセリフ'],
+["I want to keep my hair really long, with no layers and a straight cut.",'髪はすごく長いまま、レイヤーなしでまっすぐに切りたいです。','お客様のセリフ']]},{id:'color',name:'カラー',items:[
 ["What kind of color did you have in mind?",'どんな色にしますか？','カウンセリング'],
 ["Is this the kind of color you're going for?",'こんな色にしますか？','カウンセリング'],
 ["Do you want highlights, a full color, or are we just going to touch up your roots?",'ハイライト、全体カラー、根元のリタッチのどれにしますか？','カウンセリング'],
@@ -356,7 +375,9 @@ const SCENES=[
 ["If you want to add highlights, I think making the overall color a bit darker will make them stand out more.",'ハイライトを入れるなら、全体を少し暗くしたほうが目立ちますよ。'],
 ["We can use bleach for the highlights, but it may cause a bit of damage.",'ハイライトにはブリーチを使えますが、少し傷むかもしれません。'],
 ["Would it be better if the highlights weren't quite as noticeable?",'ハイライトはあまり目立たないほうがいいですか？'],
-["Since I bleached your hair, the surface might be a little damaged. After you shampoo, make sure to dry it thoroughly.",'ブリーチしたので表面が少し傷んでいるかもしれません。シャンプーした後はしっかり乾かしてくださいね。']]},{id:'perm',name:'パーマ',items:[
+["Since I bleached your hair, the surface might be a little damaged. After you shampoo, make sure to dry it thoroughly.",'ブリーチしたので表面が少し傷んでいるかもしれません。シャンプーした後はしっかり乾かしてくださいね。'],
+["First we'll bleach, then tone, then cut.",'まずブリーチして、次にトナー、それからカットしますね。','','計画の復唱'],
+["I'd like it more random, not in neat blocks.",'きっちりしたブロックじゃなくて、もっとランダムな感じにしたいです。','お客様のセリフ']]},{id:'perm',name:'パーマ',items:[
 ["Do you currently have a perm, or have you had one recently?",'今パーマがかかっていますか？最近かけましたか？','カウンセリング'],
 ["How much curl would you like?",'どれくらいのカールにしますか？','カウンセリング'],
 ["Would you prefer loose, natural-looking curls or more defined curls?",'ゆるい自然なカールと、しっかりしたカール、どちらがいいですか？','カウンセリング'],
@@ -589,6 +610,14 @@ const REPLIES={
 "I'm planning to curl my hair with a perm tomorrow. Will this hairstyle be okay for that?":["Yes, this length works well with curls — it will look great.","はい、この長さならカールがきれいに出ますよ。"],
 "Can you finish it off by straightening it with a flat iron?":["Of course — I'll finish it with the flat iron.","もちろんです。最後にアイロンで仕上げますね。"],
 "They told me your treatment doesn't damage hair at all, so that's why I came here.":["Our treatment is very gentle, but no chemical treatment is completely damage-free — I'll use the gentlest formula for your hair.","うちのトリートメントはとてもやさしいですが、完全にノーダメージというわけではありません。あなたの髪に一番やさしい薬剤を使いますね。"],
+"I want it thinner at the bottom.":["Of course — I'll thin out the bottom so it feels lighter.","もちろんです。下のほうをすいて軽くしますね。"],
+"I want to keep enough length to tie it up.":["Got it — I'll keep enough length for you to tie it up.","分かりました。結べる長さは残しますね。"],
+"The bangs in the photo are a little too short for me.":["No problem — let's make them a little longer, to the middle of your eyebrows.","大丈夫ですよ。少し長めに、眉毛の真ん中くらいにしましょう。"],
+"Please don't cut it too short.":["Of course — I'll keep the length and check with you as I go.","もちろんです。長さを残しながら、切るたびに確認しますね。"],
+"I want something refreshing.":["How about a shorter cut with some layers? It will feel fresh and light.","短めにレイヤーを入れるのはどうですか？さっぱりして軽くなりますよ。"],
+"I want to keep my hair really long, with no layers and a straight cut.":["Got it — long, no layers, straight across.","分かりました。長いまま、レイヤーなしでまっすぐに切りますね。"],
+"I brought a picture of the design I want.":["Great — let me take a look.","ありがとうございます。見せてください。"],
+"I'd like it more random, not in neat blocks.":["Got it — I'll make the pattern more random.","分かりました。もっとランダムな感じにしますね。"],
 };
 function renderCustomer(){
   const box=$('customerList');box.innerHTML='';
